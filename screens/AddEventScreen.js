@@ -10,6 +10,8 @@ export default function AddEventScreen({ navigation, route }) {
   const [startTime, setStartTime] = useState('09:00');
   const [endTime, setEndTime] = useState('10:00');
   const [reminder, setReminder] = useState('15');
+  const [startTimeError, setStartTimeError] = useState('');
+  const [endTimeError, setEndTimeError] = useState('');
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -27,7 +29,95 @@ export default function AddEventScreen({ navigation, route }) {
         reminder: parseInt(reminder) || 0
       };
       
-      // 调用数据库函数保存事件
+    
+
+  const validateTime = (time) => {
+    if (!time) return false;
+    
+    // 检查格式是否为 HH:MM
+    if (!/^\d{1,2}:\d{0,2}$/.test(time)) {
+      return '格式应为 HH:MM';
+    }
+    
+    const [hoursStr, minutesStr] = time.split(':');
+    const hours = parseInt(hoursStr, 10);
+    const minutes = parseInt(minutesStr || '0', 10);
+    
+    if (isNaN(hours) || hours < 0 || hours > 23) {
+      return '小时必须在 0-23 之间';
+    }
+    
+    if (isNaN(minutes) || minutes < 0 || minutes > 59) {
+      return '分钟必须在 0-59 之间';
+    }
+    
+    return '';
+  };
+
+   // 格式化时间输入
+  const formatTimeInput = (input) => {
+    // 移除非数字字符
+    let cleaned = input.replace(/[^\d]/g, '');
+    
+    // 限制长度为4位数字
+    if (cleaned.length > 4) {
+      cleaned = cleaned.substring(0, 4);
+    }
+    
+    // 自动添加冒号
+    if (cleaned.length > 2) {
+      return `${cleaned.substring(0, 2)}:${cleaned.substring(2)}`;
+    }
+    
+    return cleaned;
+  };
+
+  // 处理开始时间变化
+  const handleStartTimeChange = (text) => {
+    const formatted = formatTimeInput(text);
+    setStartTime(formatted);
+    
+    // 验证时间
+    const error = validateTime(formatted);
+    setStartTimeError(error);
+  };
+
+  // 处理结束时间变化
+  const handleEndTimeChange = (text) => {
+    const formatted = formatTimeInput(text);
+    setEndTime(formatted);
+    
+    // 验证时间
+    const error = validateTime(formatted);
+    setEndTimeError(error);
+  };
+
+  // 检查时间是否有效
+  const isTimeValid = () => {
+    return !validateTime(startTime) && !validateTime(endTime);
+  };
+
+  // 保存事件
+
+    if (!isTimeValid()) {
+      Alert.alert('错误', '请检查时间输入');
+      return;
+    }
+    
+    // 解析时间
+    const [startHours, startMinutes] = startTime.split(':').map(Number);
+    const [endHours, endMinutes] = endTime.split(':').map(Number);
+    
+    // 检查结束时间是否在开始时间之后
+    const startTotalMinutes = startHours * 60 + startMinutes;
+    const endTotalMinutes = endHours * 60 + endMinutes;
+    
+    if (endTotalMinutes <= startTotalMinutes) {
+      Alert.alert('错误', '结束时间必须在开始时间之后');
+      return;
+    }
+    
+  // 调用数据库函数保存事件
       await addEvent(event);
       
       Alert.alert('成功', '日程已保存');
@@ -37,7 +127,6 @@ export default function AddEventScreen({ navigation, route }) {
       Alert.alert('错误', `保存事件失败: ${error.message}`);
     }
   };
-
   return (
     <View style={styles.container}>
       <Text style={styles.header}>添加新日程</Text>

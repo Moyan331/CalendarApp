@@ -23,13 +23,11 @@ export default function CalendarScreen({ navigation }) {
        <Button 
        title="添加日程" 
         onPress={() => navigation.navigate('AddEvent', { selectedDate: selected })} 
+        style={styles.button}
         />
-      <Button 
-       title="查看日程" 
-        onPress={() => navigation.navigate('ViewEvents', { selectedDate: selected })} 
-        />
-
-      </View>
+        <View style={styles.buttonSpacer} /> 
+         <Button title="查看日程" onPress={() => navigation.navigate('ViewEvents',{ selectedDate: selected })} style={styles.button} /> 
+        </View>
     </View>
   );
 }
@@ -48,6 +46,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   buttonSpacer: {
-    width: 20, // 按钮之间的间距
+    width: 50, // 按钮之间的间距
   },
 });
