@@ -71,9 +71,8 @@ export default function CalendarScreen({ navigation }) {
       {/* 周视图 */}
       {viewMode === 'week' && (
         <WeekView
-          selectedDate={selectedDate}
-          onSelectDate={(date) => setSelectedDate(date)}
-          markedDates={markedDates}
+          selected={selectedDate}
+          onDaySelect={(date) => setSelectedDate(date)}
         />
       )}
 
