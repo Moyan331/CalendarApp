@@ -1,62 +1,57 @@
+// components/WeekView.js
 import dayjs from 'dayjs';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-export default function WeekView({ selected, onDaySelect }) {
-  const [currentWeekStart, setCurrentWeekStart] = useState(getStartOfWeek(selected));
+export default function WeekView({ selectedDate, onSelectDate, markedDates = {} }) {
+  const [currentWeekStart, setCurrentWeekStart] = useState(
+    selectedDate ? dayjs(selectedDate).startOf('week') : dayjs().startOf('week')
+  );
 
-  // 当外部选中的日期改变时，自动同步周起点
+  // 如果选中的日期变化，自动调整当前周
   useEffect(() => {
-    setCurrentWeekStart(getStartOfWeek(selected));
-  }, [selected]);
+    if (selectedDate) {
+      const newWeekStart = dayjs(selectedDate).startOf('week');
+      setCurrentWeekStart(newWeekStart);
+    }
+  }, [selectedDate]);
 
-  // 获取一周的日期（周一到周日）
-  const getWeekDays = (start) => {
-    return Array.from({ length: 7 }, (_, i) => dayjs(start).add(i, 'day'));
-  };
-
-  const handlePrevWeek = () => {
-    setCurrentWeekStart((prev) => dayjs(prev).subtract(1, 'week'));
-  };
-
-  const handleNextWeek = () => {
-    setCurrentWeekStart((prev) => dayjs(prev).add(1, 'week'));
-  };
-
-  const weekDays = getWeekDays(currentWeekStart);
+  // 生成当前周的7天
+  const days = Array.from({ length: 7 }, (_, i) => currentWeekStart.add(i, 'day'));
 
   return (
-    <View style={styles.container}>
+    <View>
       {/* 上一周 / 下一周按钮 */}
-      <View style={styles.navContainer}>
-        <TouchableOpacity onPress={handlePrevWeek}>
-          <Text style={styles.navButton}>{'‹ 上周'}</Text>
+      <View style={styles.weekNav}>
+        <TouchableOpacity onPress={() => setCurrentWeekStart(currentWeekStart.subtract(1, 'week'))}>
+          <Text style={styles.navText}>上周</Text>
         </TouchableOpacity>
-        <Text style={styles.weekRange}>
-          {dayjs(currentWeekStart).format('MM/DD')} - {dayjs(currentWeekStart).add(6, 'day').format('MM/DD')}
-        </Text>
-        <TouchableOpacity onPress={handleNextWeek}>
-          <Text style={styles.navButton}>{'下周 ›'}</Text>
+        <Text style={styles.weekTitle}>{currentWeekStart.format('YYYY年MM月')}</Text>
+        <TouchableOpacity onPress={() => setCurrentWeekStart(currentWeekStart.add(1, 'week'))}>
+          <Text style={styles.navText}>下周</Text>
         </TouchableOpacity>
       </View>
 
-      {/* 一周的日期 */}
+      {/* 每天按钮 */}
       <View style={styles.weekRow}>
-        {weekDays.map((date) => {
-          const dateStr = date.format('YYYY-MM-DD');
-          const isSelected = dateStr === selected;
+        {days.map((day) => {
+          const dateStr = day.format('YYYY-MM-DD');
+          const isSelected = selectedDate === dateStr;
+          const hasEvent = markedDates[dateStr]?.marked;
+
           return (
             <TouchableOpacity
               key={dateStr}
               style={[styles.dayContainer, isSelected && styles.selectedDay]}
-              onPress={() => onDaySelect(dateStr)}
+              onPress={() => onSelectDate(dateStr)}
             >
               <Text style={[styles.dayText, isSelected && styles.selectedDayText]}>
-                {date.format('dd')} {/* 显示 周一/周二... */}
+                {day.format('dd')}
               </Text>
-              <Text style={[styles.dateText, isSelected && styles.selectedDateText]}>
-                {date.format('D')}
+              <Text style={[styles.dateText, isSelected && styles.selectedDayText]}>
+                {day.format('D')}
               </Text>
+              {hasEvent && <View style={styles.dot} />}
             </TouchableOpacity>
           );
         })}
@@ -65,60 +60,21 @@ export default function WeekView({ selected, onDaySelect }) {
   );
 }
 
-// 获取指定日期所在周的周一
-function getStartOfWeek(dateString) {
-  const date = dayjs(dateString || dayjs());
-  const dayOfWeek = date.day() === 0 ? 7 : date.day(); // 把周日当作第7天
-  return date.subtract(dayOfWeek - 1, 'day');
-}
-
 const styles = StyleSheet.create({
-  container: {
-    padding: 10,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    elevation: 2,
-  },
-  navContainer: {
+  weekNav: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginHorizontal: 20,
+    marginBottom: 10,
     alignItems: 'center',
-    marginBottom: 8,
   },
-  navButton: {
-    fontSize: 16,
-    color: '#2196F3',
-  },
-  weekRange: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  weekRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  dayContainer: {
-    alignItems: 'center',
-    flex: 1,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  dayText: {
-    fontSize: 12,
-    color: '#666',
-  },
-  dateText: {
-    fontSize: 16,
-    color: '#000',
-  },
-  selectedDay: {
-    backgroundColor: '#2196F3',
-  },
-  selectedDayText: {
-    color: '#fff',
-  },
-  selectedDateText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
+  navText: { fontSize: 16, color: '#2196F3' },
+  weekTitle: { fontSize: 16, fontWeight: 'bold' },
+  weekRow: { flexDirection: 'row', justifyContent: 'space-around', marginVertical: 5 },
+  dayContainer: { alignItems: 'center', padding: 6, borderRadius: 8 },
+  selectedDay: { backgroundColor: '#2196F3' },
+  dayText: { fontSize: 14 },
+  dateText: { fontSize: 16 },
+  selectedDayText: { color: 'white', fontWeight: 'bold' },
+  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#2196F3', marginTop: 2 },
 });
