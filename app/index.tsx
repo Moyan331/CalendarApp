@@ -6,6 +6,7 @@ import { ActivityIndicator, Alert, View } from 'react-native';
 import { initDB } from '../db/database';
 import AddEventScreen from '../screens/AddEventScreen';
 import CalendarScreen from '../screens/CalendarScreen';
+import EditEventScreen from '../screens/EditEventScreen';
 import ViewEventsScreen from '../screens/ViewScreen';
 
 const Stack = createNativeStackNavigator();
@@ -54,6 +55,11 @@ export default function App() {
           name="ViewEvents" 
           component={ViewEventsScreen} 
           options={{ title: '查看日程' }} 
+        />
+        <Stack.Screen 
+         name="EditEvent" 
+         component={EditEventScreen} 
+         options={{ title: '编辑日程' }} 
         />
       </Stack.Navigator>
   );
