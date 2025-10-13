@@ -65,25 +65,11 @@ export default function WeekView({ selected, onDaySelect }) {
 
   return (
     <View style={styles.container}>
-      {/* ⬅️➡️ 周切换控制区
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.navButton} onPress={() => handleChangeWeek(-1)}>
-          <Text style={styles.navText}>⬅️ 上一周</Text>
-        </TouchableOpacity>
 
-        <Text style={styles.headerTitle}>
-          {dayjs(selectWeekDay).startOf('week').format('MM月DD日')} -{' '}
-          {dayjs(selectWeekDay).endOf('week').format('MM月DD日')}
-        </Text>
-
-        <TouchableOpacity style={styles.navButton} onPress={() => handleChangeWeek(1)}>
-          <Text style={styles.navText}>下一周 ➡️</Text>
-        </TouchableOpacity>
-      </View> */}
-      {/* 🔄 周切换控制条 */}
+      {/* 🔄 周切换控制条
       <View style={styles.headerContainer}>
         <TouchableOpacity style={styles.arrowButton} onPress={() => setSelectWeekDay(dayjs(selectWeekDay).subtract(1, 'week').format('YYYY-MM-DD'))}>
-          <Text style={styles.arrowText}>‹</Text>
+          <Text style={styles.arrowText}>◀</Text>
         </TouchableOpacity>
 
         <Text style={styles.weekTitle}>
@@ -91,9 +77,30 @@ export default function WeekView({ selected, onDaySelect }) {
         </Text>
 
         <TouchableOpacity style={styles.arrowButton} onPress={() => setSelectWeekDay(dayjs(selectWeekDay).add(1, 'week').format('YYYY-MM-DD'))}>
-          <Text style={styles.arrowText}>›</Text>
+          <Text style={styles.arrowText}>▶</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
+
+     {/* 🔄 周切换控制条 */}
+        <View style={styles.headerContainer}>
+          <TouchableOpacity
+            // style={styles.arrowButton}
+            onPress={() => setSelectWeekDay(dayjs(selectWeekDay).subtract(1, 'week').format('YYYY-MM-DD'))}
+          >
+            <Text style={styles.arrowText}>◀</Text>
+          </TouchableOpacity>
+
+          <Text style={styles.weekTitle}>
+            {dayjs(selectWeekDay).startOf('week').format('MM/DD')} - {dayjs(selectWeekDay).endOf('week').format('MM/DD')}
+          </Text>
+
+          <TouchableOpacity
+            // style={styles.arrowButton}
+            onPress={() => setSelectWeekDay(dayjs(selectWeekDay).add(1, 'week').format('YYYY-MM-DD'))}
+          >
+            <Text style={styles.arrowText}>▶</Text>
+          </TouchableOpacity>
+        </View>
 
 
       {/* 周导航条 */}
@@ -185,32 +192,32 @@ const styles = StyleSheet.create({
   eventTitle: { fontSize: 16 },
   emptyText: { textAlign: 'center', marginTop: 20, color: '#aaa' },
 
-  headerContainer: {
+
+headerContainer: {
+  // flexDirection: 'row',
+  // justifyContent: 'space-between',
+  // alignItems: 'center',
+  // paddingHorizontal: 16,
+  // paddingVertical: 8,
+  // backgroundColor: '#f9f9f9',       // 月视图按钮背景色一致
+  // borderBottomWidth: 1,
+  // borderBottomColor: '#ddd',
   flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  paddingHorizontal: 16,
-  paddingVertical: 8,
-  backgroundColor: '#fff',
-  borderBottomWidth: 1,
-  borderBottomColor: '#eee',
-  shadowColor: '#000',
-  shadowOpacity: 0.05,
-  shadowRadius: 3,
-  elevation: 2,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    marginBottom: 10,
 },
 
 weekTitle: {
-  fontSize: 16,
-  fontWeight: '600',
-  color: '#333',
+ fontSize: 18, fontWeight: '600', color: '#1976d2' 
 },
 
 arrowButton: {
-  width: 36,
-  height: 36,
-  borderRadius: 18,
-  backgroundColor: '#2196F3',
+  width: 40,
+  height: 40,
+  borderRadius: 20,
+  backgroundColor: '#42a5f5',       // 蓝色按钮
   justifyContent: 'center',
   alignItems: 'center',
   shadowColor: '#000',
@@ -219,10 +226,7 @@ arrowButton: {
   elevation: 3,
 },
 
-arrowText: {
-  color: '#fff',
-  fontSize: 20,
-  fontWeight: 'bold',
-},
+arrowText: { fontSize: 20, color: '#42a5f5', fontWeight: 'bold' },
+
 
 });
