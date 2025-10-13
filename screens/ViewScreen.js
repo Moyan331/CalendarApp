@@ -1,27 +1,34 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Button, FlatList, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { deleteEvent, getEvents } from '../db/database';
 
 export default function ViewEventsScreen({ navigation, route }) {
-  // 检查参数是否存在
   if (!route.params || !route.params.selectedDate) {
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>错误：未提供日期参数</Text>
-        <Button
-          title="返回日历"
-          onPress={() => navigation.goBack()}
-          color="#2196F3"
-        />
+        <TouchableOpacity
+          style={styles.primaryButton}
+          onPress={() => navigation.goBack()}>
+          <Text style={styles.primaryButtonText}>返回日历</Text>
+        </TouchableOpacity>
       </View>
     );
   }
-  
+
   const { selectedDate } = route.params;
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+
   // 加载事件
   useEffect(() => {
     const loadEvents = async () => {
@@ -36,162 +43,195 @@ export default function ViewEventsScreen({ navigation, route }) {
         setLoading(false);
       }
     };
-    
+
     loadEvents();
   }, [selectedDate]);
-  
+
   // 删除事件
   const handleDelete = async (id) => {
     try {
       await deleteEvent(id);
-      // 更新事件列表
-      setEvents(events.filter(event => event.id !== id));
+      setEvents(events.filter((event) => event.id !== id));
       Alert.alert('成功', '事件已删除');
     } catch (error) {
       console.error('删除事件失败:', error);
       Alert.alert('错误', '删除事件失败');
     }
   };
-  
+
   // 渲染事件项
   const renderEventItem = ({ item }) => (
-    <View style={styles.eventItem}>
+    <View style={styles.eventCard}>
       <View style={styles.eventHeader}>
-        <Text style={styles.eventTime}>{item.startTime} - {item.endTime}</Text>
-        <View style={styles.eventActions}>
-          <Icon 
-            name="edit" 
-            size={24} 
-            color="#2196F3" 
+        <Text style={styles.eventTime}>
+          {item.startTime} - {item.endTime}
+        </Text>
+        <View style={styles.actionGroup}>
+          <TouchableOpacity
             onPress={() => navigation.navigate('EditEvent', { event: item })}
-            style={styles.actionIcon}
-          />
-          <Icon 
-            name="delete" 
-            size={24} 
-            color="#F44336" 
+            style={styles.iconButton}>
+            <Icon name="edit" size={20} color="#2196F3" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
             onPress={() => handleDelete(item.id)}
-            style={styles.actionIcon}
-          />
+            style={styles.iconButton}>
+            <Icon name="delete" size={20} color="#F44336" />
+          </TouchableOpacity>
         </View>
       </View>
+
       <Text style={styles.eventTitle}>{item.title}</Text>
-      {item.description && (
+
+      {item.description ? (
         <Text style={styles.eventDescription}>{item.description}</Text>
-      )}
-      {item.reminder && (
-        <Text style={styles.eventReminder}>提前 {item.reminder} 分钟提醒</Text>
-      )}
+      ) : null}
+
+      {item.reminder ? (
+        <Text style={styles.eventReminder}>⏰ 提前 {item.reminder} 分钟提醒</Text>
+      ) : null}
     </View>
   );
 
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" />
-        <Text>加载中...</Text>
+        <ActivityIndicator size="large" color="#2196F3" />
+        <Text style={styles.loadingText}>加载中...</Text>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>{selectedDate} 的日程</Text>
-      
+      {/* 顶部标题 */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>{selectedDate} 的日程</Text>
+      </View>
+
+      {/* 内容区域 */}
       {events.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Icon name="event-busy" size={64} color="#ccc" />
+          <Icon name="event-busy" size={72} color="#ccc" />
           <Text style={styles.emptyText}>当天没有日程安排</Text>
         </View>
       ) : (
         <FlatList
           data={events}
           renderItem={renderEventItem}
-          keyExtractor={item => item.id.toString()}
+          keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.listContainer}
         />
       )}
-      
-      <Button
-        title="添加新日程"
-        onPress={() => navigation.navigate('AddEvent', { selectedDate })}
-        color="#2196F3"
-      />
+
+      {/* 悬浮添加按钮 */}
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => navigation.navigate('AddEvent', { selectedDate })}>
+        <Icon name="add" size={28} color="#fff" />
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  /** 主体结构 **/
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: '#F8FAFF',
   },
   header: {
-    fontSize: 22,
+    backgroundColor: '#2196F3',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  headerTitle: {
+    color: '#fff',
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#333',
   },
+
+  /** 列表部分 **/
   listContainer: {
-    paddingBottom: 20,
-  },
-  eventItem: {
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8,
     padding: 16,
+  },
+  eventCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 14,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#eee',
+    borderColor: '#e0e0e0',
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
   },
   eventHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    alignItems: 'center',
+    marginBottom: 6,
   },
   eventTime: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#555',
-  },
-  eventActions: {
-    flexDirection: 'row',
-  },
-  actionIcon: {
-    marginLeft: 12,
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#1976D2',
   },
   eventTitle: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: 'bold',
-    marginBottom: 8,
     color: '#333',
+    marginBottom: 4,
   },
   eventDescription: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#666',
-    marginBottom: 8,
+    marginBottom: 4,
   },
   eventReminder: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#888',
-    fontStyle: 'italic',
+    marginTop: 4,
   },
+
+  /** 操作区 **/
+  actionGroup: {
+    flexDirection: 'row',
+  },
+  iconButton: {
+    marginLeft: 10,
+    padding: 4,
+  },
+
+  /** 空页面 **/
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginVertical: 40,
   },
   emptyText: {
-    fontSize: 18,
+    fontSize: 16,
     color: '#999',
-    marginTop: 16,
+    marginTop: 12,
   },
+
+  /** 加载页 **/
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
+  loadingText: {
+    color: '#666',
+    marginTop: 8,
+  },
+
+  /** 错误页 **/
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -203,5 +243,32 @@ const styles = StyleSheet.create({
     color: 'red',
     marginBottom: 20,
     textAlign: 'center',
+  },
+  primaryButton: {
+    backgroundColor: '#2196F3',
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  primaryButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+
+  /** 悬浮按钮 **/
+  fab: {
+    position: 'absolute',
+    bottom: 28,
+    right: 28,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#2196F3',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
   },
 });
