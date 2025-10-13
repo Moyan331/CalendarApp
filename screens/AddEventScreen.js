@@ -1,5 +1,7 @@
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import React, { useState } from 'react';
-import { Alert, Button, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { addEvent } from '../db/database';
 
 export default function AddEventScreen({ navigation, route }) {
@@ -10,15 +12,13 @@ export default function AddEventScreen({ navigation, route }) {
   const [startTime, setStartTime] = useState('09:00');
   const [endTime, setEndTime] = useState('10:00');
   const [reminder, setReminder] = useState('15');
-  const [startTimeError, setStartTimeError] = useState('');
-  const [endTimeError, setEndTimeError] = useState('');
 
   const handleSave = async () => {
     if (!title.trim()) {
       Alert.alert('错误', '标题不能为空');
       return;
     }
-    
+
     try {
       const event = {
         title,
@@ -26,100 +26,10 @@ export default function AddEventScreen({ navigation, route }) {
         date: selectedDate,
         startTime,
         endTime,
-        reminder: parseInt(reminder) || 0
+        reminder: parseInt(reminder) || 0,
       };
-      
-    
 
-  const validateTime = (time) => {
-    if (!time) return false;
-    
-    // 检查格式是否为 HH:MM
-    if (!/^\d{1,2}:\d{0,2}$/.test(time)) {
-      return '格式应为 HH:MM';
-    }
-    
-    const [hoursStr, minutesStr] = time.split(':');
-    const hours = parseInt(hoursStr, 10);
-    const minutes = parseInt(minutesStr || '0', 10);
-    
-    if (isNaN(hours) || hours < 0 || hours > 23) {
-      return '小时必须在 0-23 之间';
-    }
-    
-    if (isNaN(minutes) || minutes < 0 || minutes > 59) {
-      return '分钟必须在 0-59 之间';
-    }
-    
-    return '';
-  };
-
-   // 格式化时间输入
-  const formatTimeInput = (input) => {
-    // 移除非数字字符
-    let cleaned = input.replace(/[^\d]/g, '');
-    
-    // 限制长度为4位数字
-    if (cleaned.length > 4) {
-      cleaned = cleaned.substring(0, 4);
-    }
-    
-    // 自动添加冒号
-    if (cleaned.length > 2) {
-      return `${cleaned.substring(0, 2)}:${cleaned.substring(2)}`;
-    }
-    
-    return cleaned;
-  };
-
-  // 处理开始时间变化
-  const handleStartTimeChange = (text) => {
-    const formatted = formatTimeInput(text);
-    setStartTime(formatted);
-    
-    // 验证时间
-    const error = validateTime(formatted);
-    setStartTimeError(error);
-  };
-
-  // 处理结束时间变化
-  const handleEndTimeChange = (text) => {
-    const formatted = formatTimeInput(text);
-    setEndTime(formatted);
-    
-    // 验证时间
-    const error = validateTime(formatted);
-    setEndTimeError(error);
-  };
-
-  // 检查时间是否有效
-  const isTimeValid = () => {
-    return !validateTime(startTime) && !validateTime(endTime);
-  };
-
-  // 保存事件
-
-    if (!isTimeValid()) {
-      Alert.alert('错误', '请检查时间输入');
-      return;
-    }
-    
-    // 解析时间
-    const [startHours, startMinutes] = startTime.split(':').map(Number);
-    const [endHours, endMinutes] = endTime.split(':').map(Number);
-    
-    // 检查结束时间是否在开始时间之后
-    const startTotalMinutes = startHours * 60 + startMinutes;
-    const endTotalMinutes = endHours * 60 + endMinutes;
-    
-    if (endTotalMinutes <= startTotalMinutes) {
-      Alert.alert('错误', '结束时间必须在开始时间之后');
-      return;
-    }
-    
-  // 调用数据库函数保存事件
       await addEvent(event);
-      
       Alert.alert('成功', '日程已保存');
       navigation.goBack();
     } catch (error) {
@@ -127,118 +37,170 @@ export default function AddEventScreen({ navigation, route }) {
       Alert.alert('错误', `保存事件失败: ${error.message}`);
     }
   };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>添加新日程</Text>
-      <Text style={styles.dateText}>日期: {selectedDate}</Text>
-      
-      <Text style={styles.label}>标题 *</Text>
-      <TextInput
-        placeholder="请输入日程标题"
-        value={title}
-        onChangeText={setTitle}
-        style={styles.input}
-      />
-      
-      <Text style={styles.label}>描述</Text>
-      <TextInput
-        placeholder="请输入日程描述"
-        value={description}
-        onChangeText={setDescription}
-        style={[styles.input, styles.multilineInput]}
-        multiline
-      />
-      
-      <View style={styles.timeContainer}>
-        <View style={styles.timeInputContainer}>
-          <Text style={styles.label}>开始时间</Text>
+    <LinearGradient
+      colors={['#e3f2fd', '#ffffff']}
+      style={styles.gradient}
+    >
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.headerBox}>
+          <Text style={styles.header}>添加新日程</Text>
+          <Text style={styles.dateText}>📅 日期: {selectedDate}</Text>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.label}>标题 *</Text>
           <TextInput
-            placeholder="HH:MM"
-            value={startTime}
-            onChangeText={setStartTime}
-            style={styles.timeInput}
-            keyboardType="numbers-and-punctuation"
+            placeholder="请输入日程标题"
+            value={title}
+            onChangeText={setTitle}
+            style={styles.input}
+          />
+
+          <Text style={styles.label}>描述</Text>
+          <TextInput
+            placeholder="请输入日程描述"
+            value={description}
+            onChangeText={setDescription}
+            style={[styles.input, styles.multilineInput]}
+            multiline
           />
         </View>
-        
-        <View style={styles.timeInputContainer}>
-          <Text style={styles.label}>结束时间</Text>
+
+        <View style={styles.card}>
+          <Text style={styles.sectionTitle}>🕒 时间设置</Text>
+          <View style={styles.timeRow}>
+            <View style={styles.timeInputContainer}>
+              <Text style={styles.label}>开始时间</Text>
+              <TextInput
+                placeholder="HH:MM"
+                value={startTime}
+                onChangeText={setStartTime}
+                style={styles.input}
+                keyboardType="numbers-and-punctuation"
+              />
+            </View>
+
+            <View style={styles.timeInputContainer}>
+              <Text style={styles.label}>结束时间</Text>
+              <TextInput
+                placeholder="HH:MM"
+                value={endTime}
+                onChangeText={setEndTime}
+                style={styles.input}
+                keyboardType="numbers-and-punctuation"
+              />
+            </View>
+          </View>
+
+          <Text style={styles.label}>提醒时间（分钟）</Text>
           <TextInput
-            placeholder="HH:MM"
-            value={endTime}
-            onChangeText={setEndTime}
-            style={styles.timeInput}
-            keyboardType="numbers-and-punctuation"
+            placeholder="提前多少分钟提醒"
+            value={reminder}
+            onChangeText={setReminder}
+            style={styles.input}
+            keyboardType="numeric"
           />
         </View>
-      </View>
-      
-      <Text style={styles.label}>提醒时间 (分钟)</Text>
-      <TextInput
-        placeholder="提前多少分钟提醒"
-        value={reminder}
-        onChangeText={setReminder}
-        style={styles.input}
-        keyboardType="numeric"
-      />
-      
-      <Button
-        title="保存日程"
-        onPress={handleSave}
-        color="#2196F3"
-      />
-    </View>
+
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+          <LinearGradient
+            colors={['#42a5f5', '#1e88e5']}
+            style={styles.saveGradient}
+          >
+            <Ionicons name="save-outline" size={20} color="#fff" style={{ marginRight: 8 }} />
+            <Text style={styles.saveText}>保存日程</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+      </ScrollView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  gradient: {
     flex: 1,
+  },
+  container: {
     padding: 20,
-    backgroundColor: '#fff',
+    paddingBottom: 40,
+  },
+  headerBox: {
+    marginBottom: 20,
   },
   header: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#333',
+    fontSize: 26,
+    fontWeight: '700',
+    color: '#1565c0',
   },
   dateText: {
+    fontSize: 16,
+    color: '#555',
+    marginTop: 6,
+  },
+  sectionTitle: {
     fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 12,
+    color: '#1976d2',
+  },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 14,
+    padding: 16,
     marginBottom: 20,
-    color: '#666',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 6,
+    elevation: 4,
   },
   label: {
-    fontSize: 16,
-    marginBottom: 8,
+    fontSize: 15,
     color: '#444',
+    marginBottom: 6,
+    marginTop: 10,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 20,
+    borderColor: '#cfd8dc',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     fontSize: 16,
+    backgroundColor: '#fafafa',
   },
   multilineInput: {
     height: 100,
     textAlignVertical: 'top',
   },
-  timeContainer: {
+  timeRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 20,
   },
   timeInputContainer: {
     flex: 1,
     marginRight: 10,
   },
-  timeInput: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    padding: 12,
-    borderRadius: 8,
-    fontSize: 16,
+  saveButton: {
+    borderRadius: 14,
+    overflow: 'hidden',
+  },
+  saveGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 14,
+    shadowColor: '#42a5f5',
+    shadowOpacity: 0.4,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 5,
+  },
+  saveText: {
+    color: '#fff',
+    fontSize: 17,
+    fontWeight: '600',
   },
 });
