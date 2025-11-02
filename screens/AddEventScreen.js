@@ -12,13 +12,33 @@ export default function AddEventScreen({ navigation, route }) {
   const [startTime, setStartTime] = useState('09:00');
   const [endTime, setEndTime] = useState('10:00');
   const [reminder, setReminder] = useState('15');
-
+const validateTime = (time) => {
+    if (!time) return false;
+    if (!/^\d{1,2}:\d{0,2}$/.test(time)) return '格式应为 HH:MM';
+    const [hStr, mStr] = time.split(':');
+    const h = parseInt(hStr, 10);
+    const m = parseInt(mStr || '0', 10);
+    if (h < 0 || h > 23) return '小时必须在 0-23';
+    if (m < 0 || m > 59) return '分钟必须在 0-59';
+    return '';
+  };
   const handleSave = async () => {
     if (!title.trim()) {
       Alert.alert('错误', '标题不能为空');
       return;
     }
+    const startErr = validateTime(startTime);
+    if (startErr) { Alert.alert('错误', `开始时间: ${startErr}`); return; }
 
+    const endErr = validateTime(endTime);
+    if (endErr) { Alert.alert('错误', `结束时间: ${endErr}`); return; }
+
+    const [sH, sM] = startTime.split(':').map(Number);
+    const [eH, eM] = endTime.split(':').map(Number);
+    if (eH * 60 + eM <= sH * 60 + sM) {
+      Alert.alert('错误', '结束时间必须在开始时间之后');
+      return;
+    }
     try {
       const event = {
         title,
