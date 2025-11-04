@@ -22,6 +22,20 @@ const validateTime = (time) => {
     if (m < 0 || m > 59) return '分钟必须在 0-59';
     return '';
   };
+  const validateStartTime = (date, time) => {
+  // 创建事件开始时间
+  const eventDateTime = new Date(`${date}T${time}:00`);
+  
+  // 获取当前时间
+  const now = new Date();
+  
+  // 比较时间
+  if (eventDateTime < now) {
+    return '开始时间不能早于当前时间';
+  }
+  
+  return ''; // 验证通过
+};
   const handleSave = async () => {
     if (!title.trim()) {
       Alert.alert('错误', '标题不能为空');
@@ -29,6 +43,12 @@ const validateTime = (time) => {
     }
     const startErr = validateTime(startTime);
     if (startErr) { Alert.alert('错误', `开始时间: ${startErr}`); return; }
+    // 验证开始时间是否早于当前时间
+    const timeValidation = validateStartTime(selectedDate, startTime);
+    if (timeValidation) {
+      Alert.alert('错误', timeValidation);
+      return;
+    }
 
     const endErr = validateTime(endTime);
     if (endErr) { Alert.alert('错误', `结束时间: ${endErr}`); return; }
