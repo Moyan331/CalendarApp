@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native'; // 添加这行
+import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -29,9 +30,10 @@ export default function ViewEventsScreen({ navigation, route }) {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 加载事件
-  useEffect(() => {
-    const loadEvents = async () => {
+   // 使用 useFocusEffect 在屏幕获得焦点时自动刷新
+  useFocusEffect(
+    useCallback(() => {
+      const loadEvents = async () => {
       try {
         setLoading(true);
         const eventsData = await getEvents(selectedDate);
@@ -43,9 +45,28 @@ export default function ViewEventsScreen({ navigation, route }) {
         setLoading(false);
       }
     };
+      // 当屏幕获得焦点时加载事件
+      loadEvents();
 
-    loadEvents();
-  }, [selectedDate]);
+    }, [selectedDate])
+  );
+  // 加载事件
+  // useEffect(() => {
+  //   const loadEvents = async () => {
+  //     try {
+  //       setLoading(true);
+  //       const eventsData = await getEvents(selectedDate);
+  //       setEvents(eventsData);
+  //       setLoading(false);
+  //     } catch (error) {
+  //       console.error('加载事件失败:', error);
+  //       Alert.alert('错误', '加载事件失败');
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   loadEvents();
+  // }, [selectedDate]);
 
   // 删除事件
   const handleDelete = async (id) => {

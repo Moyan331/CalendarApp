@@ -4,7 +4,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import WeekView from '../components/WeekView';
@@ -24,7 +24,14 @@ export default function CalendarScreen({ navigation }) {
   const [viewMode, setViewMode] = useState('month');
   const [events, setEvents] = useState([]);
   const [currentMonth, setCurrentMonth] = useState(dayjs().format('YYYY-MM-DD'));
-
+  const today = new Date().toISOString().split('T')[0];
+ // 初始化：选中当天日期
+  useEffect(() => {
+    // 设置默认选中当天
+    setSelectedDate(today);
+    // 加载当天的事件
+    loadEvents(today);
+  }, []);
   const loadEvents = useCallback(async (date) => {
     if (!date) return;
     const rows = await getEvents(date);
