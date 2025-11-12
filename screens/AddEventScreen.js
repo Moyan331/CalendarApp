@@ -1,7 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
+import { Picker } from '@react-native-picker/picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import TimePicker from '../components/TimePicker';
 import { addEvent } from '../db/database';
 
 export default function AddEventScreen({ navigation, route }) {
@@ -9,63 +11,60 @@ export default function AddEventScreen({ navigation, route }) {
   
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [startTime, setStartTime] = useState('09:00');
-  const [endTime, setEndTime] = useState('10:00');
+  
+  // 时间状态 - 使用数字而不是字符串
+  const [startHour, setStartHour] = useState(9);
+  const [startMinute, setStartMinute] = useState(0);
+  const [endHour, setEndHour] = useState(10);
+  const [endMinute, setEndMinute] = useState(0);
+  
   const [reminder, setReminder] = useState('15');
-const validateTime = (time) => {
-    if (!time) return false;
-    if (!/^\d{1,2}:\d{0,2}$/.test(time)) return '格式应为 HH:MM';
-    const [hStr, mStr] = time.split(':');
-    const h = parseInt(hStr, 10);
-    const m = parseInt(mStr || '0', 10);
-    if (h < 0 || h > 23) return '小时必须在 0-23';
-    if (m < 0 || m > 59) return '分钟必须在 0-59';
+  
+  // 计算显示的时间字符串（用于预览）
+  const startTimeString = `${startHour.toString().padStart(2, '0')}:${startMinute.toString().padStart(2, '0')}`;
+  const endTimeString = `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}`;
+
+  // 验证开始时间是否早于当前时间
+  const validateStartTime = (date, hour, minute) => {
+    const eventDateTime = new Date(`${date}T${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:00`);
+    const now = new Date();
+    
+    if (eventDateTime < now) {
+      return '开始时间不能早于当前时间';
+    }
+    
     return '';
   };
-  const validateStartTime = (date, time) => {
-  // 创建事件开始时间
-  const eventDateTime = new Date(`${date}T${time}:00`);
-  
-  // 获取当前时间
-  const now = new Date();
-  
-  // 比较时间
-  if (eventDateTime < now) {
-    return '开始时间不能早于当前时间';
-  }
-  
-  return ''; // 验证通过
-};
+
   const handleSave = async () => {
     if (!title.trim()) {
       Alert.alert('错误', '标题不能为空');
       return;
     }
-    const startErr = validateTime(startTime);
-    if (startErr) { Alert.alert('错误', `开始时间: ${startErr}`); return; }
+    
     // 验证开始时间是否早于当前时间
-    const timeValidation = validateStartTime(selectedDate, startTime);
+    const timeValidation = validateStartTime(selectedDate, startHour, startMinute);
     if (timeValidation) {
       Alert.alert('错误', timeValidation);
       return;
     }
-
-    const endErr = validateTime(endTime);
-    if (endErr) { Alert.alert('错误', `结束时间: ${endErr}`); return; }
-
-    const [sH, sM] = startTime.split(':').map(Number);
-    const [eH, eM] = endTime.split(':').map(Number);
-    if (eH * 60 + eM <= sH * 60 + sM) {
+    
+    // 验证结束时间是否在开始时间之后
+    const startTotalMinutes = startHour * 60 + startMinute;
+    const endTotalMinutes = endHour * 60 + endMinute;
+    
+    if (endTotalMinutes <= startTotalMinutes) {
       Alert.alert('错误', '结束时间必须在开始时间之后');
       return;
     }
+    
     try {
       const event = {
         title,
         description,
         date: selectedDate,
-        startTime,
-        endTime,
+        startTime: startTimeString,
+        endTime: endTimeString,
         reminder: parseInt(reminder) || 0,
       };
 
@@ -110,38 +109,52 @@ const validateTime = (time) => {
 
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>🕒 时间设置</Text>
-          <View style={styles.timeRow}>
-            <View style={styles.timeInputContainer}>
-              <Text style={styles.label}>开始时间</Text>
-              <TextInput
-                placeholder="HH:MM"
-                value={startTime}
-                onChangeText={setStartTime}
-                style={styles.input}
-                keyboardType="numbers-and-punctuation"
-              />
-            </View>
-
-            <View style={styles.timeInputContainer}>
-              <Text style={styles.label}>结束时间</Text>
-              <TextInput
-                placeholder="HH:MM"
-                value={endTime}
-                onChangeText={setEndTime}
-                style={styles.input}
-                keyboardType="numbers-and-punctuation"
-              />
-            </View>
+          
+          {/* 开始时间选择器 */}
+          <TimePicker
+            label="开始时间"
+            selectedHour={startHour}
+            selectedMinute={startMinute}
+            onHourChange={setStartHour}
+            onMinuteChange={setStartMinute}
+          />
+          
+          {/* 结束时间选择器 */}
+          <TimePicker
+            label="结束时间"
+            selectedHour={endHour}
+            selectedMinute={endMinute}
+            onHourChange={setEndHour}
+            onMinuteChange={setEndMinute}
+          />
+          
+          {/* 时间预览 */}
+          <View style={styles.timePreview}>
+            <Text style={styles.timePreviewText}>
+              开始时间: {startTimeString} | 结束时间: {endTimeString}
+            </Text>
+            <Text style={styles.durationText}>
+              持续时间: {Math.floor((endHour * 60 + endMinute - startHour * 60 - startMinute) / 60)}小时
+              {(endHour * 60 + endMinute - startHour * 60 - startMinute) % 60}分钟
+            </Text>
           </View>
 
           <Text style={styles.label}>提醒时间（分钟）</Text>
-          <TextInput
-            placeholder="提前多少分钟提醒"
-            value={reminder}
-            onChangeText={setReminder}
-            style={styles.input}
-            keyboardType="numeric"
-          />
+          <View style={styles.reminderContainer}>
+            <Picker
+              selectedValue={reminder}
+              onValueChange={setReminder}
+              style={styles.reminderPicker}
+            >
+              <Picker.Item label="不提醒" value="0" />
+              <Picker.Item label="5分钟前" value="5" />
+              <Picker.Item label="15分钟前" value="15" />
+              <Picker.Item label="30分钟前" value="30" />
+              <Picker.Item label="1小时前" value="60" />
+              <Picker.Item label="2小时前" value="120" />
+              <Picker.Item label="1天前" value="1440" />
+            </Picker>
+          </View>
         </View>
 
         <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
@@ -179,12 +192,6 @@ const styles = StyleSheet.create({
     color: '#555',
     marginTop: 6,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 12,
-    color: '#1976d2',
-  },
   card: {
     backgroundColor: '#fff',
     borderRadius: 14,
@@ -195,6 +202,12 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 3 },
     shadowRadius: 6,
     elevation: 4,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 12,
+    color: '#1976d2',
   },
   label: {
     fontSize: 15,
@@ -215,13 +228,33 @@ const styles = StyleSheet.create({
     height: 100,
     textAlignVertical: 'top',
   },
-  timeRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  timePreview: {
+    backgroundColor: '#f1f8ff',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 15,
   },
-  timeInputContainer: {
-    flex: 1,
-    marginRight: 10,
+  timePreviewText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1976d2',
+    textAlign: 'center',
+  },
+  durationText: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 5,
+  },
+  reminderContainer: {
+    borderWidth: 1,
+    borderColor: '#cfd8dc',
+    borderRadius: 10,
+    backgroundColor: '#fafafa',
+    overflow: 'hidden',
+  },
+  reminderPicker: {
+    height: 50,
   },
   saveButton: {
     borderRadius: 14,
@@ -233,10 +266,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 14,
     borderRadius: 14,
-    shadowColor: '#42a5f5',
-    shadowOpacity: 0.4,
-    shadowOffset: { width: 0, height: 3 },
-    shadowRadius: 5,
   },
   saveText: {
     color: '#fff',
