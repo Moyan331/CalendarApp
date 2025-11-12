@@ -15,7 +15,6 @@ import { updateEvent } from '../db/database';
 
 export default function EditEventScreen({ navigation, route }) {
   const { event } = route.params;
-  
   // 解析原有的时间字符串
   const parseTimeString = (timeStr) => {
     if (!timeStr) return { hour: 9, minute: 0 };
@@ -33,6 +32,7 @@ export default function EditEventScreen({ navigation, route }) {
   const [endMinute, setEndMinute] = useState(parseTimeString(event.endTime).minute);
   
   const [reminder, setReminder] = useState(event.reminder ? event.reminder.toString() : '0');
+
 
   // 计算显示的时间字符串
   const startTimeString = `${startHour.toString().padStart(2, '0')}:${startMinute.toString().padStart(2, '0')}`;
@@ -87,7 +87,7 @@ export default function EditEventScreen({ navigation, route }) {
       
       await updateEvent(event.id, updatedEvent);
       Alert.alert('成功', '日程已更新');
-      navigation.navigate('ViewEvents', { selectedDate: event.date });
+      navigation.goBack();
     } catch (error) {
       console.error('更新失败:', error);
       Alert.alert('错误', '更新事件失败，请重试');

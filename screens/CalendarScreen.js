@@ -24,7 +24,9 @@ export default function CalendarScreen({ navigation }) {
   const [viewMode, setViewMode] = useState('month');
   const [events, setEvents] = useState([]);
   const [currentMonth, setCurrentMonth] = useState(dayjs().format('YYYY-MM-DD'));
+ // const [currentMonth, setCurrentMonth] = useState(new Date());
   const today = new Date().toISOString().split('T')[0];
+  const [showDatePicker, setShowDatePicker] = useState(false);
  // 初始化：选中当天日期
   useEffect(() => {
     // 设置默认选中当天
@@ -64,6 +66,12 @@ export default function CalendarScreen({ navigation }) {
     setCurrentMonth(dayjs(currentMonth).add(1, 'month').format('YYYY-MM-DD'));
   };
 
+    // 处理日期选择器确认
+  const handleDateConfirm = (selectedDate) => {
+    setCurrentMonth(selectedDate);
+    setShowDatePicker(false);
+    // 可以添加逻辑跳转到选中的月份
+  };
   return (
     <LinearGradient colors={['#e3f2fd', '#ffffff']} style={{ flex: 1 }}>
       <View style={styles.container}>
@@ -101,6 +109,11 @@ export default function CalendarScreen({ navigation }) {
               <Text style={styles.monthText}>
                 {dayjs(currentMonth).locale('zh-cn').format('YYYY年MM月')}
               </Text>
+              {/* <TouchableOpacity  onPress={() => setShowDatePicker(true)}>
+              <Text style={styles.monthText}>
+                {dayjs(currentMonth).locale('zh-cn').format('YYYY年MM月')}
+              </Text> 
+              </TouchableOpacity> */}
               <TouchableOpacity onPress={handleNextMonth}>
                 <Text style={styles.arrow}>▶</Text>
               </TouchableOpacity>
