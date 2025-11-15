@@ -25,7 +25,6 @@ export default function CalendarScreen({ navigation }) {
   const [viewMode, setViewMode] = useState('month');
   const [events, setEvents] = useState([]);
   const [currentMonth, setCurrentMonth] = useState(dayjs().format('YYYY-MM-DD'));
- // const [currentMonth, setCurrentMonth] = useState(new Date());
   const today = new Date().toISOString().split('T')[0];
   // 初始化：选中当天日期
   useEffect(() => {

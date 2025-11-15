@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { addEvent } from '../db/database';
+import { convertToLunar } from '../utils/lunarCalculator';
 
 export default function AddEventScreen({ navigation, route }) {
   const selectedDate = route.params?.selectedDate || new Date().toISOString().split('T')[0];
@@ -23,6 +24,25 @@ export default function AddEventScreen({ navigation, route }) {
   // 计算显示的时间字符串（用于预览）
   const startTimeString = startTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
   const endTimeString = endTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+
+  // 获取农历日期字符串
+  const getLunarDateString = (date) => {
+    try {
+      const lunarInfo = convertToLunar(date);
+      if (!lunarInfo) return '无法获取农历信息';
+      
+      // 如果是节气，优先显示节气
+      if (lunarInfo.isTerm && lunarInfo.term) {
+        return `${lunarInfo.gzYear}${lunarInfo.animal}年 ${lunarInfo.month}${lunarInfo.day} ${lunarInfo.term}`;
+      }
+      
+      // 返回完整的农历日期信息
+      return `${lunarInfo.gzYear}${lunarInfo.animal}年 ${lunarInfo.month}${lunarInfo.day}`;
+    } catch (error) {
+      console.warn('获取农历信息失败:', error);
+      return '无法获取农历信息';
+    }
+  };
 
   // 验证开始时间是否早于当前时间
   const validateStartTime = (date, time) => {
@@ -96,7 +116,8 @@ export default function AddEventScreen({ navigation, route }) {
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.headerBox}>
           <Text style={styles.header}>添加新日程</Text>
-          <Text style={styles.dateText}>📅 日期: {selectedDate}</Text>
+          <Text style={styles.dateText}>📅 公历: {selectedDate}</Text>
+          <Text style={styles.dateText}>📅 农历: {getLunarDateString(selectedDate)}</Text>
         </View>
 
         <View style={styles.card}>

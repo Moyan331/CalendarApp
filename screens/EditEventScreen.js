@@ -1,3 +1,4 @@
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import React, { useState } from 'react';
 import {
@@ -10,8 +11,8 @@ import {
   View,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { updateEvent } from '../db/database';
+import { convertToLunar } from '../utils/lunarCalculator';
 
 export default function EditEventScreen({ navigation, route }) {
   const { event } = route.params;
@@ -40,6 +41,25 @@ export default function EditEventScreen({ navigation, route }) {
   // 计算显示的时间字符串
   const startTimeString = startTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
   const endTimeString = endTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+
+  // 获取农历日期字符串
+  const getLunarDateString = (date) => {
+    try {
+      const lunarInfo = convertToLunar(date);
+      if (!lunarInfo) return '无法获取农历信息';
+      
+      // 如果是节气，优先显示节气
+      if (lunarInfo.isTerm && lunarInfo.term) {
+      return `${lunarInfo.gzYear}${lunarInfo.animal}年 ${lunarInfo.month}${lunarInfo.day} ${lunarInfo.term}`;
+      }
+      
+      // 返回完整的农历日期信息
+      return `${lunarInfo.gzYear}${lunarInfo.animal}年 ${lunarInfo.month}${lunarInfo.day}`;
+    } catch (error) {
+      console.warn('获取农历信息失败:', error);
+      return '无法获取农历信息';
+    }
+  };
 
   // 验证开始时间是否早于当前时间（仅对今日事件）
   const validateStartTime = (date, time) => {
@@ -115,7 +135,8 @@ export default function EditEventScreen({ navigation, route }) {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.dateText}>📅 {event.date}</Text>
+        <Text style={styles.dateText}>📅 公历: {event.date}</Text>
+        <Text style={styles.dateText}>📅 农历: {getLunarDateString(event.date)}</Text>
 
         <View style={styles.card}>
           <Text style={styles.label}>标题 *</Text>

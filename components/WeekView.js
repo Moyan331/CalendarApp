@@ -56,10 +56,10 @@ export default function WeekView({ selected, onDaySelect }) {
     onDaySelect?.(date);
   };
 
-  /** ⏪ 上一周 / ⏩ 下一周 */
-  const handleChangeWeek = (direction) => {
-    const newDate = dayjs(selectWeekDay).add(direction * 7, 'day').format('YYYY-MM-DD');
+  // 当周切换时，更新选中的日期
+  const handleWeekChange = (newDate) => {
     setSelectWeekDay(newDate);
+    // 如果父组件传入了onDaySelect回调，则通知父组件更新选中日期
     onDaySelect?.(newDate);
   };
 
@@ -69,8 +69,7 @@ export default function WeekView({ selected, onDaySelect }) {
      {/* 🔄 周切换控制条 */}
         <View style={styles.headerContainer}>
           <TouchableOpacity
-
-            onPress={() => setSelectWeekDay(dayjs(selectWeekDay).subtract(1, 'week').format('YYYY-MM-DD'))}
+            onPress={() => handleWeekChange(dayjs(selectWeekDay).subtract(1, 'week').format('YYYY-MM-DD'))}
           >
             <Text style={styles.arrowText}>◀</Text>
           </TouchableOpacity>
@@ -80,8 +79,7 @@ export default function WeekView({ selected, onDaySelect }) {
           </Text>
 
           <TouchableOpacity
-
-            onPress={() => setSelectWeekDay(dayjs(selectWeekDay).add(1, 'week').format('YYYY-MM-DD'))}
+            onPress={() => handleWeekChange(dayjs(selectWeekDay).add(1, 'week').format('YYYY-MM-DD'))}
           >
             <Text style={styles.arrowText}>▶</Text>
           </TouchableOpacity>

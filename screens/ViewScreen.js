@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { deleteEvent, getEvents } from '../db/database';
+import { convertToLunar } from '../utils/lunarCalculator';
 
 export default function ViewEventsScreen({ navigation, route }) {
   if (!route.params || !route.params.selectedDate) {
@@ -29,6 +30,25 @@ export default function ViewEventsScreen({ navigation, route }) {
   const { selectedDate } = route.params;
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // 获取农历日期字符串
+  const getLunarDateString = (date) => {
+    try {
+      const lunarInfo = convertToLunar(date);
+      if (!lunarInfo) return '无法获取农历信息';
+      
+      // 如果是节气，优先显示节气
+      if (lunarInfo.isTerm && lunarInfo.term) {
+        return `${lunarInfo.gzYear}${lunarInfo.animal}年 ${lunarInfo.month}${lunarInfo.day} ${lunarInfo.term}`;
+      }
+      
+      // 返回完整的农历日期信息
+      return `${lunarInfo.gzYear}${lunarInfo.animal}年 ${lunarInfo.month}${lunarInfo.day}`;
+    } catch (error) {
+      console.warn('获取农历信息失败:', error);
+      return '无法获取农历信息';
+    }
+  };
 
    // 使用 useFocusEffect 在屏幕获得焦点时自动刷新
   useFocusEffect(
@@ -50,30 +70,13 @@ export default function ViewEventsScreen({ navigation, route }) {
 
     }, [selectedDate])
   );
-  // 加载事件
-  // useEffect(() => {
-  //   const loadEvents = async () => {
-  //     try {
-  //       setLoading(true);
-  //       const eventsData = await getEvents(selectedDate);
-  //       setEvents(eventsData);
-  //       setLoading(false);
-  //     } catch (error) {
-  //       console.error('加载事件失败:', error);
-  //       Alert.alert('错误', '加载事件失败');
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   loadEvents();
-  // }, [selectedDate]);
 
   // 删除事件
   const handleDelete = async (id) => {
     try {
       await deleteEvent(id);
       setEvents(events.filter((event) => event.id !== id));
-      Alert.alert('成功', '事件已删除');
+      // Alert.alert('成功', '事件已删除');
     } catch (error) {
       console.error('删除事件失败:', error);
       Alert.alert('错误', '删除事件失败');
@@ -128,6 +131,7 @@ export default function ViewEventsScreen({ navigation, route }) {
       {/* 顶部标题 */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>{selectedDate} 的日程</Text>
+        <Text style={styles.headerSubtitle}>农历: {getLunarDateString(selectedDate)}</Text>
       </View>
 
       {/* 内容区域 */}
@@ -174,6 +178,11 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  headerSubtitle: {
+    color: '#e3f2fd',
+    fontSize: 14,
+    marginTop: 4,
   },
 
   /** 列表部分 **/
