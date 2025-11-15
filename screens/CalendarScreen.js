@@ -8,6 +8,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import WeekView from '../components/WeekView';
+import { convertToLunar } from '../utils/lunarCalculator';
 
 // 配置中文月份
 LocaleConfig.locales['zh'] = {
@@ -26,8 +27,7 @@ export default function CalendarScreen({ navigation }) {
   const [currentMonth, setCurrentMonth] = useState(dayjs().format('YYYY-MM-DD'));
  // const [currentMonth, setCurrentMonth] = useState(new Date());
   const today = new Date().toISOString().split('T')[0];
-  const [showDatePicker, setShowDatePicker] = useState(false);
- // 初始化：选中当天日期
+  // 初始化：选中当天日期
   useEffect(() => {
     // 设置默认选中当天
     setSelectedDate(today);
@@ -66,12 +66,84 @@ export default function CalendarScreen({ navigation }) {
     setCurrentMonth(dayjs(currentMonth).add(1, 'month').format('YYYY-MM-DD'));
   };
 
-    // 处理日期选择器确认
-  const handleDateConfirm = (selectedDate) => {
-    setCurrentMonth(selectedDate);
-    setShowDatePicker(false);
-    // 可以添加逻辑跳转到选中的月份
+
+  // 自定义日期组件，显示农历
+  const renderDay = (day) => {
+    try {
+      // 检查 day 对象是否存在
+      if (!day) {
+        return (
+          <View style={styles.dayContainer}>
+            <Text style={styles.dayText}></Text>
+          </View>
+        );
+      }
+
+      // 从 day 中提取日期信息
+      const dateInfo = day.date;
+      
+      // 检查 dateInfo 是否存在
+      if (!dateInfo || !dateInfo.dateString) {
+        return (
+          <TouchableOpacity 
+            style={styles.dayContainer} 
+            onPress={() => setSelectedDate(dateInfo.dateString)}>
+            <Text style={styles.dayText}>{day.children || day.day || ''}</Text>
+          </TouchableOpacity>
+        );
+      }
+
+      // 计算农历日期
+      const lunarInfo = convertToLunar(dateInfo.dateString);
+      const isToday = dateInfo.dateString === today;
+      const isSelected = dateInfo.dateString === selectedDate;
+      
+      // 根据是否选中使用不同的样式
+      const dayContainerStyle = isSelected 
+        ? styles.selectedDayContainer 
+        : styles.dayContainer;
+      
+      const dayTextStyle = [
+        styles.dayText,
+        isToday && styles.todayText,
+        isSelected && styles.selectedDayText
+      ];
+      
+      const lunarTextStyle = [
+        styles.lunarText,
+        isSelected && styles.selectedLunarText
+      ];
+      
+      return (
+        <TouchableOpacity 
+          style={dayContainerStyle} 
+          onPress={() => setSelectedDate(dateInfo.dateString)}>
+          <Text style={dayTextStyle}>
+            {dateInfo.day}
+          </Text>
+          {lunarInfo && (
+            <Text style={lunarTextStyle} numberOfLines={1}>
+              {lunarInfo.isTerm ? `${lunarInfo.term}` : `${lunarInfo.month}${lunarInfo.day}`}
+            </Text>
+          )}
+        </TouchableOpacity>
+      );
+    } catch (error) {
+      // 出现任何错误时，至少显示公历日期
+      console.warn('渲染农历日期时出错:', error);
+      return (
+        <TouchableOpacity 
+          style={styles.dayContainer} 
+          onPress={() => setSelectedDate(dateInfo.dateString)}>
+          <Text style={styles.dayText}>
+            {day && day.children || day && day.date && day.date.day || ''}
+          </Text>
+        </TouchableOpacity>
+      );
+    }
   };
+
+
   return (
     <LinearGradient colors={['#e3f2fd', '#ffffff']} style={{ flex: 1 }}>
       <View style={styles.container}>
@@ -109,18 +181,13 @@ export default function CalendarScreen({ navigation }) {
               <Text style={styles.monthText}>
                 {dayjs(currentMonth).locale('zh-cn').format('YYYY年MM月')}
               </Text>
-              {/* <TouchableOpacity  onPress={() => setShowDatePicker(true)}>
-              <Text style={styles.monthText}>
-                {dayjs(currentMonth).locale('zh-cn').format('YYYY年MM月')}
-              </Text> 
-              </TouchableOpacity> */}
               <TouchableOpacity onPress={handleNextMonth}>
                 <Text style={styles.arrow}>▶</Text>
               </TouchableOpacity>
             </View>
 
             <Calendar
-              key={currentMonth}            // ← 添加这一行
+              key={currentMonth}          
               current={currentMonth}
               onDayPress={(day) => setSelectedDate(day.dateString)}
               markedDates={markedDates}
@@ -135,6 +202,7 @@ export default function CalendarScreen({ navigation }) {
               }}
               renderArrow={() => null} // 隐藏默认箭头
               renderHeader={() => null} // 隐藏默认月份标题
+              dayComponent={renderDay} // 使用自定义日期组件
             />
           </View>
         )}
@@ -230,4 +298,41 @@ const styles = StyleSheet.create({
   },
   arrow: { fontSize: 20, color: '#42a5f5', fontWeight: 'bold' },
   monthText: { fontSize: 18, fontWeight: '600', color: '#1976d2' },
+  
+  // 农历日期样式
+  dayContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+  },
+  dayText: {
+    fontSize: 14,
+    color: '#333',
+    fontWeight: 'normal',
+  },
+  todayText: {
+    color: '#42a5f5',
+    fontWeight: 'bold',
+  },
+  lunarText: {
+    fontSize: 9,
+    color: '#999',
+    marginTop: 2,
+  },
+  selectedDayContainer: {
+    backgroundColor: '#42a5f5',
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 6,
+    alignSelf: 'stretch',
+  },
+  selectedDayText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  selectedLunarText: {
+    color: '#e3f2fd',
+  }
 });

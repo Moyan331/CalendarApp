@@ -3,7 +3,7 @@ import { Picker } from '@react-native-picker/picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import TimePicker from '../components/TimePicker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { addEvent } from '../db/database';
 
 export default function AddEventScreen({ navigation, route }) {
@@ -12,21 +12,21 @@ export default function AddEventScreen({ navigation, route }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   
-  // 时间状态 - 使用数字而不是字符串
-  const [startHour, setStartHour] = useState(9);
-  const [startMinute, setStartMinute] = useState(0);
-  const [endHour, setEndHour] = useState(10);
-  const [endMinute, setEndMinute] = useState(0);
+  // 时间状态 - 使用Date对象而不是数字
+  const [startTime, setStartTime] = useState(new Date());
+  const [endTime, setEndTime] = useState(new Date(new Date().setHours(new Date().getHours() + 1)));
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
   
   const [reminder, setReminder] = useState('15');
   
   // 计算显示的时间字符串（用于预览）
-  const startTimeString = `${startHour.toString().padStart(2, '0')}:${startMinute.toString().padStart(2, '0')}`;
-  const endTimeString = `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}`;
+  const startTimeString = startTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+  const endTimeString = endTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
 
   // 验证开始时间是否早于当前时间
-  const validateStartTime = (date, hour, minute) => {
-    const eventDateTime = new Date(`${date}T${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:00`);
+  const validateStartTime = (date, time) => {
+    const eventDateTime = new Date(date + 'T' + time.toLocaleTimeString('sv-SE'));
     const now = new Date();
     
     if (eventDateTime < now) {
@@ -43,17 +43,14 @@ export default function AddEventScreen({ navigation, route }) {
     }
     
     // 验证开始时间是否早于当前时间
-    const timeValidation = validateStartTime(selectedDate, startHour, startMinute);
+    const timeValidation = validateStartTime(selectedDate, startTime);
     if (timeValidation) {
       Alert.alert('错误', timeValidation);
       return;
     }
     
     // 验证结束时间是否在开始时间之后
-    const startTotalMinutes = startHour * 60 + startMinute;
-    const endTotalMinutes = endHour * 60 + endMinute;
-    
-    if (endTotalMinutes <= startTotalMinutes) {
+    if (endTime <= startTime) {
       Alert.alert('错误', '结束时间必须在开始时间之后');
       return;
     }
@@ -74,6 +71,20 @@ export default function AddEventScreen({ navigation, route }) {
     } catch (error) {
       console.error('保存事件失败:', error);
       Alert.alert('错误', `保存事件失败: ${error.message}`);
+    }
+  };
+
+  const onStartChange = (event, selectedTime) => {
+    setShowStartPicker(false);
+    if (event.type === 'set' && selectedTime) {
+      setStartTime(selectedTime);
+    }
+  };
+
+  const onEndChange = (event, selectedTime) => {
+    setShowEndPicker(false);
+    if (event.type === 'set' && selectedTime) {
+      setEndTime(selectedTime);
     }
   };
 
@@ -111,22 +122,44 @@ export default function AddEventScreen({ navigation, route }) {
           <Text style={styles.sectionTitle}>🕒 时间设置</Text>
           
           {/* 开始时间选择器 */}
-          <TimePicker
-            label="开始时间"
-            selectedHour={startHour}
-            selectedMinute={startMinute}
-            onHourChange={setStartHour}
-            onMinuteChange={setStartMinute}
-          />
+          <View style={styles.timePickerContainer}>
+            <Text style={styles.label}>开始时间</Text>
+            <TouchableOpacity 
+              style={styles.timeButton} 
+              onPress={() => setShowStartPicker(true)}
+            >
+              <Text style={styles.timeButtonText}>{startTimeString}</Text>
+            </TouchableOpacity>
+            {showStartPicker && (
+              <DateTimePicker
+                value={startTime}
+                mode="time"
+                display="spinner"
+                onChange={onStartChange}
+                locale="zh-CN"
+              />
+            )}
+          </View>
           
           {/* 结束时间选择器 */}
-          <TimePicker
-            label="结束时间"
-            selectedHour={endHour}
-            selectedMinute={endMinute}
-            onHourChange={setEndHour}
-            onMinuteChange={setEndMinute}
-          />
+          <View style={styles.timePickerContainer}>
+            <Text style={styles.label}>结束时间</Text>
+            <TouchableOpacity 
+              style={styles.timeButton} 
+              onPress={() => setShowEndPicker(true)}
+            >
+              <Text style={styles.timeButtonText}>{endTimeString}</Text>
+            </TouchableOpacity>
+            {showEndPicker && (
+              <DateTimePicker
+                value={endTime}
+                mode="time"
+                display="spinner"
+                onChange={onEndChange}
+                locale="zh-CN"
+              />
+            )}
+          </View>
           
           {/* 时间预览 */}
           <View style={styles.timePreview}>
@@ -134,8 +167,8 @@ export default function AddEventScreen({ navigation, route }) {
               开始时间: {startTimeString} | 结束时间: {endTimeString}
             </Text>
             <Text style={styles.durationText}>
-              持续时间: {Math.floor((endHour * 60 + endMinute - startHour * 60 - startMinute) / 60)}小时
-              {(endHour * 60 + endMinute - startHour * 60 - startMinute) % 60}分钟
+              持续时间: {Math.floor((endTime - startTime) / (1000 * 60 * 60))}小时
+              {Math.floor((endTime - startTime) % (1000 * 60 * 60) / (1000 * 60))}分钟
             </Text>
           </View>
 
@@ -227,6 +260,22 @@ const styles = StyleSheet.create({
   multilineInput: {
     height: 100,
     textAlignVertical: 'top',
+  },
+  timePickerContainer: {
+    marginBottom: 15,
+  },
+  timeButton: {
+    backgroundColor: '#f1f8ff',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#bbdefb',
+  },
+  timeButtonText: {
+    fontSize: 16,
+    color: '#1976d2',
+    textAlign: 'center',
+    fontWeight: '500',
   },
   timePreview: {
     backgroundColor: '#f1f8ff',

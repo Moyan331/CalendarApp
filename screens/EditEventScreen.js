@@ -10,39 +10,42 @@ import {
   View,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import TimePicker from '../components/TimePicker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { updateEvent } from '../db/database';
 
 export default function EditEventScreen({ navigation, route }) {
   const { event } = route.params;
   // 解析原有的时间字符串
-  const parseTimeString = (timeStr) => {
-    if (!timeStr) return { hour: 9, minute: 0 };
-    const [hour, minute] = timeStr.split(':').map(Number);
-    return { hour: hour || 9, minute: minute || 0 };
+  const parseTimeString = (timeStr, date) => {
+    if (!timeStr) return new Date();
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    const dateTime = new Date(date);
+    dateTime.setHours(hours || 9);
+    dateTime.setMinutes(minutes || 0);
+    dateTime.setSeconds(0);
+    return dateTime;
   };
 
   const [title, setTitle] = useState(event.title);
   const [description, setDescription] = useState(event.description || '');
   
   // 时间状态
-  const [startHour, setStartHour] = useState(parseTimeString(event.startTime).hour);
-  const [startMinute, setStartMinute] = useState(parseTimeString(event.startTime).minute);
-  const [endHour, setEndHour] = useState(parseTimeString(event.endTime).hour);
-  const [endMinute, setEndMinute] = useState(parseTimeString(event.endTime).minute);
+  const [startTime, setStartTime] = useState(parseTimeString(event.startTime, event.date));
+  const [endTime, setEndTime] = useState(parseTimeString(event.endTime, event.date));
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
   
   const [reminder, setReminder] = useState(event.reminder ? event.reminder.toString() : '0');
 
-
   // 计算显示的时间字符串
-  const startTimeString = `${startHour.toString().padStart(2, '0')}:${startMinute.toString().padStart(2, '0')}`;
-  const endTimeString = `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}`;
+  const startTimeString = startTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+  const endTimeString = endTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
 
   // 验证开始时间是否早于当前时间（仅对今日事件）
-  const validateStartTime = (date, hour, minute) => {
+  const validateStartTime = (date, time) => {
     const today = new Date().toISOString().split('T')[0];
     if (date === today) {
-      const eventDateTime = new Date(`${date}T${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:00`);
+      const eventDateTime = new Date(date + 'T' + time.toLocaleTimeString('sv-SE'));
       const now = new Date();
       
       if (eventDateTime < now) {
@@ -60,17 +63,14 @@ export default function EditEventScreen({ navigation, route }) {
     }
 
     // 验证开始时间是否早于当前时间
-    const timeValidation = validateStartTime(event.date, startHour, startMinute);
+    const timeValidation = validateStartTime(event.date, startTime);
     if (timeValidation) {
       Alert.alert('错误', timeValidation);
       return;
     }
 
     // 验证结束时间是否在开始时间之后
-    const startTotalMinutes = startHour * 60 + startMinute;
-    const endTotalMinutes = endHour * 60 + endMinute;
-    
-    if (endTotalMinutes <= startTotalMinutes) {
+    if (endTime <= startTime) {
       Alert.alert('错误', '结束时间必须在开始时间之后');
       return;
     }
@@ -91,6 +91,20 @@ export default function EditEventScreen({ navigation, route }) {
     } catch (error) {
       console.error('更新失败:', error);
       Alert.alert('错误', '更新事件失败，请重试');
+    }
+  };
+
+  const onStartChange = (event, selectedTime) => {
+    setShowStartPicker(false);
+    if (event.type === 'set' && selectedTime) {
+      setStartTime(selectedTime);
+    }
+  };
+
+  const onEndChange = (event, selectedTime) => {
+    setShowEndPicker(false);
+    if (event.type === 'set' && selectedTime) {
+      setEndTime(selectedTime);
     }
   };
 
@@ -122,22 +136,44 @@ export default function EditEventScreen({ navigation, route }) {
           />
 
           {/* 开始时间选择器 */}
-          <TimePicker
-            label="开始时间"
-            selectedHour={startHour}
-            selectedMinute={startMinute}
-            onHourChange={setStartHour}
-            onMinuteChange={setStartMinute}
-          />
+          <View style={styles.timePickerContainer}>
+            <Text style={styles.label}>开始时间</Text>
+            <TouchableOpacity 
+              style={styles.timeButton} 
+              onPress={() => setShowStartPicker(true)}
+            >
+              <Text style={styles.timeButtonText}>{startTimeString}</Text>
+            </TouchableOpacity>
+            {showStartPicker && (
+              <DateTimePicker
+                value={startTime}
+                mode="time"
+                display="spinner"
+                onChange={onStartChange}
+                locale="zh-CN"
+              />
+            )}
+          </View>
           
           {/* 结束时间选择器 */}
-          <TimePicker
-            label="结束时间"
-            selectedHour={endHour}
-            selectedMinute={endMinute}
-            onHourChange={setEndHour}
-            onMinuteChange={setEndMinute}
-          />
+          <View style={styles.timePickerContainer}>
+            <Text style={styles.label}>结束时间</Text>
+            <TouchableOpacity 
+              style={styles.timeButton} 
+              onPress={() => setShowEndPicker(true)}
+            >
+              <Text style={styles.timeButtonText}>{endTimeString}</Text>
+            </TouchableOpacity>
+            {showEndPicker && (
+              <DateTimePicker
+                value={endTime}
+                mode="time"
+                display="spinner"
+                onChange={onEndChange}
+                locale="zh-CN"
+              />
+            )}
+          </View>
           
           {/* 时间预览 */}
           <View style={styles.timePreview}>
@@ -145,9 +181,9 @@ export default function EditEventScreen({ navigation, route }) {
               开始: {startTimeString} | 结束: {endTimeString}
             </Text>
             <Text style={styles.durationText}>
-                          持续时间: {Math.floor((endHour * 60 + endMinute - startHour * 60 - startMinute) / 60)}小时
-                          {(endHour * 60 + endMinute - startHour * 60 - startMinute) % 60}分钟
-                        </Text>
+              持续时间: {Math.floor((endTime - startTime) / (1000 * 60 * 60))}小时
+              {Math.floor((endTime - startTime) % (1000 * 60 * 60) / (1000 * 60))}分钟
+            </Text>
           </View>
 
           <Text style={styles.label}>提前提醒</Text>
@@ -205,6 +241,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#fafafa',
   },
   multilineInput: { height: 100, textAlignVertical: 'top' },
+  timePickerContainer: {
+    marginBottom: 15,
+  },
+  timeButton: {
+    backgroundColor: '#f1f8ff',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#bbdefb',
+  },
+  timeButtonText: {
+    fontSize: 16,
+    color: '#1976d2',
+    textAlign: 'center',
+    fontWeight: '500',
+  },
   timePreview: {
     backgroundColor: '#f1f8ff',
     padding: 12,
