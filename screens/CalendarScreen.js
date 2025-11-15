@@ -87,7 +87,7 @@ export default function CalendarScreen({ navigation }) {
         return (
           <TouchableOpacity 
             style={styles.dayContainer} 
-            onPress={() => setSelectedDate(dateInfo.dateString)}>
+            onPress={() => day.onPress && day.onPress()}>
             <Text style={styles.dayText}>{day.children || day.day || ''}</Text>
           </TouchableOpacity>
         );
@@ -98,6 +98,11 @@ export default function CalendarScreen({ navigation }) {
       const isToday = dateInfo.dateString === today;
       const isSelected = dateInfo.dateString === selectedDate;
       
+      // 判断是否为当前月份的日期
+      const currentMonthYear = dayjs(currentMonth).format('YYYY-MM');
+      const dateMonthYear = dayjs(dateInfo.dateString).format('YYYY-MM');
+      const isCurrentMonth = currentMonthYear === dateMonthYear;
+      
       // 根据是否选中使用不同的样式
       const dayContainerStyle = isSelected 
         ? styles.selectedDayContainer 
@@ -106,18 +111,32 @@ export default function CalendarScreen({ navigation }) {
       const dayTextStyle = [
         styles.dayText,
         isToday && styles.todayText,
-        isSelected && styles.selectedDayText
+        isSelected && styles.selectedDayText,
+        !isCurrentMonth && { color: 'rgba(0, 0, 0, 0.3)' } // 非当前月日期显示为灰色透明
       ];
       
       const lunarTextStyle = [
         styles.lunarText,
-        isSelected && styles.selectedLunarText
+        isSelected && styles.selectedLunarText,
+        !isCurrentMonth && { color: 'rgba(153, 153, 153, 0.3)' } // 非当前月农历显示为灰色透明
       ];
+      
+      // 处理日期点击事件
+      const handleDayPress = () => {
+        if (isCurrentMonth) {
+          // 如果是当前月的日期，正常选择
+          setSelectedDate(dateInfo.dateString);
+        } else {
+          // 如果是非当前月的日期，跳转到对应的月份
+          setCurrentMonth(dateInfo.dateString);
+          setSelectedDate(dateInfo.dateString)
+        }
+      };
       
       return (
         <TouchableOpacity 
           style={dayContainerStyle} 
-          onPress={() => setSelectedDate(dateInfo.dateString)}>
+          onPress={handleDayPress}>
           <Text style={dayTextStyle}>
             {dateInfo.day}
           </Text>
@@ -134,7 +153,7 @@ export default function CalendarScreen({ navigation }) {
       return (
         <TouchableOpacity 
           style={styles.dayContainer} 
-          onPress={() => setSelectedDate(dateInfo.dateString)}>
+          onPress={() => day.onPress && day.onPress()}>
           <Text style={styles.dayText}>
             {day && day.children || day && day.date && day.date.day || ''}
           </Text>
@@ -334,5 +353,6 @@ const styles = StyleSheet.create({
   },
   selectedLunarText: {
     color: '#e3f2fd',
+    textAlign: 'center',
   }
 });
