@@ -87,7 +87,7 @@ export default function CalendarScreen({ navigation }) {
         return (
           <TouchableOpacity 
             style={styles.dayContainer} 
-            onPress={() => day.onPress && day.onPress()}>
+            onPress={() => setSelectedDate(dateInfo.dateString)}>
             <Text style={styles.dayText}>{day.children || day.day || ''}</Text>
           </TouchableOpacity>
         );
@@ -118,7 +118,7 @@ export default function CalendarScreen({ navigation }) {
       const lunarTextStyle = [
         styles.lunarText,
         isSelected && styles.selectedLunarText,
-        !isCurrentMonth && { color: 'rgba(153, 153, 153, 0.3)' } // 非当前月农历显示为灰色透明
+        !isCurrentMonth &&!isSelected&& { color: 'rgba(153, 153, 153, 0.3)' } // 非当前月农历显示为灰色透明
       ];
       
       // 处理日期点击事件
@@ -153,7 +153,7 @@ export default function CalendarScreen({ navigation }) {
       return (
         <TouchableOpacity 
           style={styles.dayContainer} 
-          onPress={() => day.onPress && day.onPress()}>
+          onPress={() =>setSelectedDate(day.date.dateString)}>
           <Text style={styles.dayText}>
             {day && day.children || day && day.date && day.date.day || ''}
           </Text>
@@ -206,9 +206,13 @@ export default function CalendarScreen({ navigation }) {
             </View>
 
             <Calendar
-              key={currentMonth}          
+              key={currentMonth}
               current={currentMonth}
               onDayPress={(day) => setSelectedDate(day.dateString)}
+              onMonthChange={(month) => {
+                // 当日历组件的月份发生变化时，同步更新currentMonth状态
+                setCurrentMonth(month.dateString);
+              }}
               markedDates={markedDates}
               markingType="dot"
               theme={{
@@ -219,9 +223,9 @@ export default function CalendarScreen({ navigation }) {
                 dayTextColor: '#333',
                 todayTextColor: '#42a5f5',
               }}
-              renderArrow={() => null} // 隐藏默认箭头
-              renderHeader={() => null} // 隐藏默认月份标题
-              dayComponent={renderDay} // 使用自定义日期组件
+              renderArrow={() => null}
+              renderHeader={() => null}
+              dayComponent={renderDay}
             />
           </View>
         )}
