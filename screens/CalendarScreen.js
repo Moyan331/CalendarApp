@@ -288,7 +288,12 @@ const styles = StyleSheet.create({
   switchButtonActive: { backgroundColor: '#42a5f5' },
   sectionTitle: { fontSize: 18, fontWeight: '600', color: '#1976d2', marginBottom: 10 },
   eventItem: { padding: 10, marginBottom: 10, borderRadius: 10, backgroundColor: '#e3f2fd' },
-  eventTime: { color: '#1565c0', fontWeight: '600' },
+  eventTime: { 
+    fontSize: 18, 
+    fontWeight: 'bold', 
+    color: '#1976D2',
+    letterSpacing: 1,
+  },
   eventTitle: { fontSize: 16, color: '#333' },
   emptyText: { textAlign: 'center', color: '#aaa', marginTop: 20 },
 

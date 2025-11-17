@@ -83,7 +83,8 @@ const styles = StyleSheet.create({
     height: 120,
   },
   pickerItem: {
-    fontSize: 18,
+    fontSize: 24,
+    fontWeight: 'bold',
   },
 });
 

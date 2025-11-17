@@ -119,8 +119,9 @@ export default function WeekView({ selected, onDaySelect }) {
         renderItem={({ item }) => (
           <View style={styles.eventItem}>
             <Text style={styles.eventDate}>
-              {item.date} {item.startTime} - {item.endTime}
+              {item.date}
             </Text>
+            <Text style={styles.eventDate}>{item.startTime} - {item.endTime}</Text>
             <Text style={styles.eventTitle}>{item.title}</Text>
           </View>
         )}
@@ -165,7 +166,13 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
   },
-  eventDate: { color: '#2196F3', fontWeight: '600' },
+  eventDate: { 
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1976D2',
+    marginBottom: 4,
+    letterSpacing: 0.5,
+  },
   eventTitle: { fontSize: 16 },
   emptyText: { textAlign: 'center', marginTop: 20, color: '#aaa' },
 

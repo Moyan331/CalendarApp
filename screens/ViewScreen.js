@@ -225,9 +225,10 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   eventTime: {
-    fontSize: 15,
-    fontWeight: '600',
+    fontSize: 20,
+    fontWeight: 'bold',
     color: '#1976D2',
+    letterSpacing: 1,
   },
   eventTitle: {
     fontSize: 17,
