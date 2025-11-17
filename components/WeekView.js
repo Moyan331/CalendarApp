@@ -118,11 +118,14 @@ export default function WeekView({ selected, onDaySelect }) {
         contentContainerStyle={{ flexGrow: 1 }}
         renderItem={({ item }) => (
           <View style={styles.eventItem}>
+            <TouchableOpacity
+            onPress={() => handleWeekChange(item.date)}>
             <Text style={styles.eventDate}>
               {item.date}
             </Text>
             <Text style={styles.eventDate}>{item.startTime} - {item.endTime}</Text>
             <Text style={styles.eventTitle}>{item.title}</Text>
+            </TouchableOpacity>
           </View>
         )}
         ListEmptyComponent={<Text style={styles.emptyText}>本周没有事件</Text>}
