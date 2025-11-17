@@ -3,6 +3,7 @@ import { Text } from '@react-navigation/elements';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { initDB } from '../db/database';
 import AddEventScreen from '../screens/AddEventScreen';
 import CalendarScreen from '../screens/CalendarScreen';
@@ -39,7 +40,7 @@ export default function App() {
   }
   
   return (
-   
+    <SafeAreaView style={{ flex: 1 }}>
       <Stack.Navigator initialRouteName="Calendar">
         <Stack.Screen 
           name="Calendar" 
@@ -70,5 +71,6 @@ export default function App() {
         }} 
         />
       </Stack.Navigator>
+    </SafeAreaView>
   );
 }
