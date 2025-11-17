@@ -1,4 +1,4 @@
-import { getEvents } from '@/db/database';
+import { getEvents, getEventsByDateRange } from '@/db/database';
 import { useFocusEffect } from '@react-navigation/native';
 import dayjs from 'dayjs';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -27,18 +27,12 @@ export default function WeekView({ selected, onDaySelect }) {
   const loadWeekEvents = useCallback(async (date) => {
     if (!date) return;
     const start = dayjs(date).startOf('week');
-    let allEvents = [];
-
-    for (let i = 0; i < 7; i++) {
-      const day = start.add(i, 'day').format('YYYY-MM-DD');
-      const dayEvents = await getEvents(day);
-      allEvents = allEvents.concat(dayEvents);
-    }
-
-    allEvents.sort((a, b) => {
-      if (a.date !== b.date) return a.date.localeCompare(b.date);
-      return a.startTime.localeCompare(b.startTime);
-    });
+    const end = dayjs(date).endOf('week');
+    
+    const allEvents = await getEventsByDateRange(
+      start.format('YYYY-MM-DD'),
+      end.format('YYYY-MM-DD')
+    );
 
     setEvents(allEvents);
   }, []);

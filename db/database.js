@@ -77,6 +77,23 @@ export const getEvents = async (date) => {
   return rows;
 };
 
+
+/**
+ * 根据日期时间段获取事件
+ * @param {string} startDate 开始日期 'YYYY-MM-DD'
+ * @param {string} endDate 结束日期 'YYYY-MM-DD'
+ * @returns {Promise<Array>}
+ */
+export const getEventsByDateRange = async (startDate, endDate) => {
+  const db = getDB();
+  const rows = await db.getAllAsync(
+    'SELECT * FROM events WHERE date BETWEEN ? AND ? ORDER BY date, startTime',
+    startDate,
+    endDate
+  );
+  return rows;
+};
+
 /**
  * 更新事件
  * @param {number} id
