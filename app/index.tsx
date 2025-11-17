@@ -44,22 +44,30 @@ export default function App() {
         <Stack.Screen 
           name="Calendar" 
           component={CalendarScreen} 
-          options={{ title: '我的日历' }} 
+          options={{ 
+            headerShown: false
+          }} 
         />
         <Stack.Screen 
           name="AddEvent" 
           component={AddEventScreen} 
-          options={{ title: '添加日程' }} 
+          options={{ 
+            headerShown: false
+          }} 
         />
         <Stack.Screen 
           name="ViewEvents" 
           component={ViewEventsScreen} 
-          options={{ title: '查看日程' }} 
+          options={{ 
+            headerShown: false
+          }} 
         />
         <Stack.Screen 
          name="EditEvent" 
          component={EditEventScreen} 
-         options={{ title: '编辑日程' }} 
+         options={{ 
+          headerShown: false
+        }} 
         />
       </Stack.Navigator>
   );

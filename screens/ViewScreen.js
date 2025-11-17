@@ -130,8 +130,16 @@ export default function ViewEventsScreen({ navigation, route }) {
     <View style={styles.container}>
       {/* 顶部标题 */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>{selectedDate} 的日程</Text>
-        <Text style={styles.headerSubtitle}>农历: {getLunarDateString(selectedDate)}</Text>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Icon name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+        <View style={styles.headerTextContainer}>
+          <Text style={styles.headerTitle}>{selectedDate} 的日程</Text>
+          <Text style={styles.headerSubtitle}>农历: {getLunarDateString(selectedDate)}</Text>
+        </View>
       </View>
 
       {/* 内容区域 */}
@@ -173,6 +181,11 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOpacity: 0.2,
     shadowRadius: 3,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerTextContainer: {
+    flex: 1,
   },
   headerTitle: {
     color: '#fff',
@@ -183,6 +196,10 @@ const styles = StyleSheet.create({
     color: '#e3f2fd',
     fontSize: 14,
     marginTop: 4,
+  },
+  backButton: {
+    marginRight: 15,
+    padding: 5,
   },
 
   /** 列表部分 **/

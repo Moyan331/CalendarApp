@@ -26,9 +26,9 @@ export default function AddEventScreen({ navigation, route }) {
   const endTimeString = endTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
 
   // 获取农历日期字符串
-  const getLunarDateString = (date) => {
+  const getLunarDateString = (dateString) => {
     try {
-      const lunarInfo = convertToLunar(date);
+      const lunarInfo = convertToLunar(dateString);
       if (!lunarInfo) return '无法获取农历信息';
       
       // 如果是节气，优先显示节气
@@ -45,8 +45,11 @@ export default function AddEventScreen({ navigation, route }) {
   };
 
   // 验证开始时间是否早于当前时间
-  const validateStartTime = (date, time) => {
-    const eventDateTime = new Date(date + 'T' + time.toLocaleTimeString('sv-SE'));
+  const validateStartTime = (dateString, time) => {
+    // 使用传入的 startTime Date 对象，并将其日期部分设置为 selectedDate
+    const eventDateTime = new Date(dateString);
+    eventDateTime.setHours(time.getHours(), time.getMinutes(), time.getSeconds(), time.getMilliseconds());
+    
     const now = new Date();
     
     if (eventDateTime < now) {
@@ -86,7 +89,6 @@ export default function AddEventScreen({ navigation, route }) {
       };
 
       await addEvent(event);
-      Alert.alert('成功', '日程已保存');
       navigation.goBack();
     } catch (error) {
       console.error('保存事件失败:', error);
@@ -115,7 +117,16 @@ export default function AddEventScreen({ navigation, route }) {
     >
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.headerBox}>
-          <Text style={styles.header}>添加新日程</Text>
+          <View style={styles.headerContainer}>
+            <TouchableOpacity 
+              style={styles.backButton}
+              onPress={() => navigation.goBack()}
+            >
+              <Ionicons name="arrow-back" size={24} color="#1565c0" />
+            </TouchableOpacity>
+            <Text style={styles.header}>添加新日程</Text>
+            <View style={{ width: 24 }} /> {/* 用于平衡布局 */}
+          </View>
           <Text style={styles.dateText}>📅 公历: {selectedDate}</Text>
           <Text style={styles.dateText}>📅 农历: {getLunarDateString(selectedDate)}</Text>
         </View>
@@ -236,10 +247,20 @@ const styles = StyleSheet.create({
   headerBox: {
     marginBottom: 20,
   },
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  backButton: {
+    padding: 5,
+    marginRight: 10,
+  },
   header: {
     fontSize: 26,
     fontWeight: '700',
     color: '#1565c0',
+    flex: 1,
   },
   dateText: {
     fontSize: 16,

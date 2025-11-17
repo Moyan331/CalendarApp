@@ -1,4 +1,4 @@
-import { getEvents, getEventsByDateRange } from '@/db/database';
+import { getEventsByDateRange } from '@/db/database';
 import { useFocusEffect } from '@react-navigation/native';
 import dayjs from 'dayjs';
 import React, { useCallback, useEffect, useState } from 'react';

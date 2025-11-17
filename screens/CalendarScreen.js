@@ -357,5 +357,19 @@ const styles = StyleSheet.create({
   selectedLunarText: {
     color: '#e3f2fd',
     textAlign: 'center',
+  },
+  
+  // Agenda视图样式
+  agendaButton: {
+    backgroundColor: '#1976d2',
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  agendaButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
   }
 });

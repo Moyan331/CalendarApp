@@ -131,6 +131,12 @@ export default function EditEventScreen({ navigation, route }) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Icon name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
         <Text style={styles.headerText}>编辑日程</Text>
       </View>
 
@@ -240,6 +246,12 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 20,
     elevation: 3,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  backButton: {
+    marginRight: 15,
+    padding: 5,
   },
   headerText: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
   scrollContent: { padding: 20, paddingBottom: 100 },
