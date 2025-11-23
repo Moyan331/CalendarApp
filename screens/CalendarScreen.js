@@ -28,7 +28,9 @@ export default function CalendarScreen({ navigation }) {
   const [currentMonth, setCurrentMonth] = useState(dayjs().format('YYYY-MM-DD'));
   
   // 使用函数来动态获取今天的日期
-  const getToday = () => new Date().toISOString().split('T')[0];
+  // const getToday = () => new Date().toLocaleDateString().split('/').join('-');
+  const getToday = () => dayjs().format('YYYY-MM-DD');
+  // const getToday = () => new Date().toISOString().split('T')[0];  
   const [today, setToday] = useState(getToday());
 
   // 初始化：选中当天日期
@@ -36,7 +38,6 @@ export default function CalendarScreen({ navigation }) {
     // 每次组件挂载时更新today状态
     const newToday = getToday();
     setToday(newToday);
-    
     // 设置默认选中当天
     setSelectedDate(newToday);
     // 加载当天的事件
