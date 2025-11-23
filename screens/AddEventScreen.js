@@ -200,8 +200,8 @@ export default function AddEventScreen({ navigation, route }) {
               开始时间: {startTimeString} | 结束时间: {endTimeString}
             </Text>
             <Text style={styles.durationText}>
-              持续时间: {Math.floor((endTime - startTime) / (1000 * 60 * 60))}小时
-              {Math.floor((endTime - startTime) % (1000 * 60 * 60) / (1000 * 60))}分钟
+              持续时间: {Math.floor((endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60))}小时
+              {Math.floor((endTime.getTime() - startTime.getTime()) % (1000 * 60 * 60) / (1000 * 60))}分钟
             </Text>
           </View>
 

@@ -7,7 +7,7 @@
     "scheme": "calendarapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "icon":"./assets/images/icon.png",
+    "icon": "./assets/images/icon.png",
     "ios": {
       "supportsTablet": true
     },
@@ -29,6 +29,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "6b6471e8-cbc2-49c4-b94f-1af51775213d"
+      }
     }
   }
 }

@@ -26,14 +26,37 @@ export default function CalendarScreen({ navigation }) {
   const [viewMode, setViewMode] = useState('month');
   const [events, setEvents] = useState([]);
   const [currentMonth, setCurrentMonth] = useState(dayjs().format('YYYY-MM-DD'));
-  const today = new Date().toISOString().split('T')[0];
+  
+  // 使用函数来动态获取今天的日期
+  const getToday = () => new Date().toISOString().split('T')[0];
+  const [today, setToday] = useState(getToday());
+
   // 初始化：选中当天日期
   useEffect(() => {
+    // 每次组件挂载时更新today状态
+    const newToday = getToday();
+    setToday(newToday);
+    
     // 设置默认选中当天
-    setSelectedDate(today);
+    setSelectedDate(newToday);
     // 加载当天的事件
-    loadEvents(today);
+    loadEvents(newToday);
   }, []);
+  
+  // 当屏幕获得焦点时刷新today状态
+  useFocusEffect(
+    useCallback(() => {
+      const newToday = getToday();
+      setToday(newToday);
+      
+      // 如果之前选中的日期是旧的今天，则更新为新的今天
+      if (selectedDate === getToday()) {
+        setSelectedDate(newToday);
+        loadEvents(newToday);
+      }
+    }, [selectedDate])
+  );
+
   const loadEvents = useCallback(async (date) => {
     if (!date) return;
     const rows = await getEvents(date);
