@@ -96,7 +96,7 @@ const getTraditionalHoliday = (date) => {
  * @param {string} date - 日期字符串，格式为 YYYY-MM-DD
  * @returns {string|null} 节日名称，如果没有节日则返回null
  */
-export default getHoliday = (date) => {
+export const getHoliday = (date) => {
   if (!date) return null;
   
   // 优先检查国际节日
@@ -109,4 +109,4 @@ export default getHoliday = (date) => {
   
   return null;
 };
-
+export default getHoliday;

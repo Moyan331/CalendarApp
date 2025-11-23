@@ -29,9 +29,6 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    },
-    "locales": {
-      "zh": "./locales/zh.json"
     }
   }
 }
