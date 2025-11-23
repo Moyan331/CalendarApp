@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { deleteEvent, getEvents } from '../db/database';
+import { getHoliday } from '../utils/holidays';
 import { convertToLunar } from '../utils/lunarCalculator';
 
 export default function ViewEventsScreen({ navigation, route }) {
@@ -139,6 +140,9 @@ export default function ViewEventsScreen({ navigation, route }) {
         <View style={styles.headerTextContainer}>
           <Text style={styles.headerTitle}>{selectedDate} 的日程</Text>
           <Text style={styles.headerSubtitle}>农历: {getLunarDateString(selectedDate)}</Text>
+          {getHoliday(selectedDate) ? (
+          <Text style={styles.holidayText}>🎉 {getHoliday(selectedDate)}</Text>
+        ) : null}
         </View>
       </View>
 
@@ -156,6 +160,8 @@ export default function ViewEventsScreen({ navigation, route }) {
           contentContainerStyle={styles.listContainer}
         />
       )}
+
+
 
       {/* 悬浮添加按钮 */}
       <TouchableOpacity
@@ -301,6 +307,13 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     color: '#fff',
     fontWeight: '600',
+  },
+
+  /** 节日信息 **/
+  holidayText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#e3f2fd',
   },
 
   /** 悬浮按钮 **/

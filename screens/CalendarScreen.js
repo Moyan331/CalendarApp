@@ -8,6 +8,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import WeekView from '../components/WeekView';
+import { getHoliday } from '../utils/holidays';
 import { convertToLunar } from '../utils/lunarCalculator';
 
 // 配置中文月份
@@ -119,7 +120,12 @@ export default function CalendarScreen({ navigation }) {
         isSelected && styles.selectedLunarText,
         !isCurrentMonth &&!isSelected&& { color: 'rgba(153, 153, 153, 0.3)' } // 非当前月农历显示为灰色透明
       ];
-      
+      const holidayTextStyle = [
+        styles.holidayText,
+        isSelected && styles.selectedLunarText,
+        !isCurrentMonth &&!isSelected&& { color: 'rgba(153, 153, 153, 0.3)' } // 非当前月农历显示为灰色透明
+      ];
+      const holiday = getHoliday(dateInfo.dateString);
       // 处理日期点击事件
       const handleDayPress = () => {
         if (isCurrentMonth) {
@@ -139,9 +145,14 @@ export default function CalendarScreen({ navigation }) {
           <Text style={dayTextStyle}>
             {dateInfo.day}
           </Text>
-          {lunarInfo && (
+          {lunarInfo &&!holiday && (
             <Text style={lunarTextStyle} numberOfLines={1}>
               {lunarInfo.isTerm ? `${lunarInfo.term}` : `${lunarInfo.month}${lunarInfo.day}`}
+            </Text>
+          )}
+          {holiday && (
+            <Text style={holidayTextStyle} numberOfLines={1}>
+              {holiday}
             </Text>
           )}
         </TouchableOpacity>
@@ -345,6 +356,11 @@ const styles = StyleSheet.create({
   lunarText: {
     fontSize: 9,
     color: '#999',
+    marginTop: 2,
+  },
+  holidayText:{
+    fontSize: 9,
+    color: '#e75b5bff',
     marginTop: 2,
   },
   selectedDayContainer: {

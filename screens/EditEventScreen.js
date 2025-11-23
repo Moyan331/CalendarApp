@@ -12,8 +12,8 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { updateEvent } from '../db/database';
+import { getHoliday } from '../utils/holidays';
 import { convertToLunar } from '../utils/lunarCalculator';
-
 export default function EditEventScreen({ navigation, route }) {
   const { event } = route.params;
   // 解析原有的时间字符串
@@ -143,6 +143,7 @@ export default function EditEventScreen({ navigation, route }) {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.dateText}>📅 公历: {event.date}</Text>
         <Text style={styles.dateText}>📅 农历: {getLunarDateString(event.date)}</Text>
+        {getHoliday(event.date)&&<Text style={styles.dateText}>🎉 {getHoliday(event.date)}</Text>}
 
         <View style={styles.card}>
           <Text style={styles.label}>标题 *</Text>

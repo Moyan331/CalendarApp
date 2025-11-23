@@ -33,6 +33,8 @@ export const convertToLunar = (date) => {
     return {
       month: lunarMonth,
       day: lunarDay,
+      lMonth: lunarInfo.lMonth,      // 农历月
+      lDay: lunarInfo.lDay,          // 农历日
       gzYear: lunarInfo.gzYear,      // 干支年
       gzMonth: lunarInfo.gzMonth,    // 干支月
       gzDay: lunarInfo.gzDay,        // 干支日
