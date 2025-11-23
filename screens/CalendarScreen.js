@@ -254,6 +254,8 @@ export default function CalendarScreen({ navigation }) {
         {viewMode === 'day' && (
           <View style={[styles.card, { flex: 1 }]}>
             <Text style={styles.sectionTitle}>{selectedDate || '请选择日期'}</Text>
+            {selectedDate && getHoliday(selectedDate)&&(<Text style={styles.holidayTitle}>🎉 {getHoliday(selectedDate)}</Text>
+)}
             <FlatList
               data={events}
               keyExtractor={(item) => item.id.toString()}
@@ -363,6 +365,9 @@ const styles = StyleSheet.create({
     color: '#e75b5bff',
     marginTop: 2,
   },
+  holidayTitle:{
+    fontSize: 16, fontWeight: '600', color: '#1976d2', marginBottom: 10
+  },
   selectedDayContainer: {
     backgroundColor: '#42a5f5',
     borderRadius: 8,
@@ -380,17 +385,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   
-  // Agenda视图样式
-  agendaButton: {
-    backgroundColor: '#1976d2',
-    padding: 10,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  agendaButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
-  }
 });
