@@ -1,5 +1,5 @@
 import * as Notifications from 'expo-notifications';
-import { Alert, Platform } from 'react-native';
+import { Platform } from 'react-native';
 
 // 配置通知处理
 Notifications.setNotificationHandler({
@@ -16,6 +16,15 @@ export const setupNotificationChannels = async () => {
     await Notifications.setNotificationChannelAsync('calendar-reminders', {
       name: '日程提醒',
       importance: Notifications.AndroidImportance.HIGH,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#FF231F7C',
+      sound: 'default',
+    });
+    
+    // 为已过期的通知设置单独的通道
+    await Notifications.setNotificationChannelAsync('expired-reminders', {
+      name: '已过期提醒',
+      importance: Notifications.AndroidImportance.DEFAULT,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#FF231F7C',
       sound: 'default',
@@ -37,12 +46,26 @@ export const scheduleNotification = async (event) => {
   const reminderTime = new Date(`${event.date}T${event.startTime}:00`);
   reminderTime.setMinutes(reminderTime.getMinutes() - event.reminder);
   
-  // 如果提醒时间已过，不安排通知
+  // 获取当前时间
   const now = new Date();
+  
+  // 如果提醒时间已过，立即发送一个通知告知用户
   if (reminderTime < now) {
-    console.log('提醒时间已过，不安排通知');
-    Alert.alert('提醒时间已过','将不会安排通知');
-    return null;
+    console.log('提醒时间已过，立即发送过期通知');
+    
+    // 立即安排一个通知告知用户时间已过
+    const expiredNotificationId = await Notifications.scheduleNotificationAsync({
+      content: {
+        title: '提醒时间已过',
+        body: `事件 "${event.title}" 的提醒时间已过`,
+        date: event.date,
+        sound: 'default',
+        channelId: Platform.OS === 'android' ? 'expired-reminders' : undefined,
+      },
+      trigger: null, // 立即触发
+    });
+    
+    return expiredNotificationId;
   }
   
   console.log('安排通知:', {
@@ -52,15 +75,18 @@ export const scheduleNotification = async (event) => {
     trigger: reminderTime
   });
   
-  // 安排通知
+  // 安排正常的通知
   const notificationId = await Notifications.scheduleNotificationAsync({
     content: {
       title: '日程提醒',
       body: `${event.title} 即将开始`,
-      date: event.date,
+      data:{date: event.date,
+            screen: 'ViewEvents',
+      },
       sound: 'default',
     },
     trigger: reminderTime,
+    channelId: Platform.OS === 'android' ? 'calendar-reminders' : undefined
   });
   
   return notificationId;
@@ -85,7 +111,7 @@ export const initNotifications = async () => {
 export const setupNotificationResponseHandler = (navigation) => {
   const subscription = Notifications.addNotificationResponseReceivedListener(response => {
     console.log('收到通知响应:', response);
-    const { eventId, date, screen } = response.notification.request.content.data;
+    const {date, screen } = response.notification.request.content.data;
     
     if (screen === 'ViewEvents' && date) {
       navigation.navigate('ViewEvents', { selectedDate: date });
