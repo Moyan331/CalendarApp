@@ -1,26 +1,74 @@
 // utils/dateTimeUtils.js
+import dayjs from 'dayjs';
+import 'dayjs/locale/zh-cn'; // 导入中文本地化
 
-/**
- * 格式化日期为 YYYY-MM-DD
- */
+// 格式化日期为 YYYY-MM-DD
 export const formatDate = (date) => {
   if (!date) return '';
-  const d = new Date(date);
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+  return dayjs(date).format('YYYY-MM-DD');
 };
 
-/**
- * 格式化时间为 HH:MM
- */
-export const formatTime = (time) => {
-  if (!time) return '';
-  const t = new Date(time);
-  const hours = String(t.getHours()).padStart(2, '0');
-  const minutes = String(t.getMinutes()).padStart(2, '0');
-  return `${hours}:${minutes}`;
+// 格式化时间为 HH:mm
+export const formatTime = (date) => {
+  if (!date) return '';
+  return dayjs(date).format('HH:mm');
+};
+
+// 获取指定日期的开始时间
+export const getStartOfDay = (dateString) => {
+  if (!dateString) return new Date();
+  // 确保我们正确地构造日期对象
+  const [year, month, day] = dateString.split('-').map(Number);
+  return new Date(year, month - 1, day, 0, 0, 0, 0);
+};
+
+// 获取指定日期的结束时间
+export const getEndOfDay = (dateString) => {
+  if (!dateString) return new Date();
+  // 确保我们正确地构造日期对象
+  const [year, month, day] = dateString.split('-').map(Number);
+  return new Date(year, month - 1, day, 23, 59, 59, 999);
+};
+
+// 获取指定日期所在周的开始日期
+export const getStartOfWeek = (dateString) => {
+  if (!dateString) return new Date();
+  const date = dayjs(dateString);
+  return date.startOf('week').format('YYYY-MM-DD');
+};
+
+// 获取指定日期所在周的结束日期
+export const getEndOfWeek = (dateString) => {
+  if (!dateString) return new Date();
+  const date = dayjs(dateString);
+  return date.endOf('week').format('YYYY-MM-DD');
+};
+
+// 获取指定日期所在月的开始日期
+export const getStartOfMonth = (dateString) => {
+  if (!dateString) return new Date();
+  const date = dayjs(dateString);
+  return date.startOf('month').format('YYYY-MM-DD');
+};
+
+// 获取指定日期所在月的结束日期
+export const getEndOfMonth = (dateString) => {
+  if (!dateString) return new Date();
+  const date = dayjs(dateString);
+  return date.endOf('month').format('YYYY-MM-DD');
+};
+
+// 检查两个日期是否为同一天
+export const isSameDay = (date1, date2) => {
+  if (!date1 || !date2) return false;
+  return dayjs(date1).format('YYYY-MM-DD') === dayjs(date2).format('YYYY-MM-DD');
+};
+
+// 获取日期的中文表示
+export const getChineseDate = (dateString) => {
+  if (!dateString) return '';
+  const date = dayjs(dateString);
+  return date.locale('zh-cn').format('YYYY年M月D日 dddd');
 };
 
 /**

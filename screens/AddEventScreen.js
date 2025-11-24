@@ -23,8 +23,8 @@ export default function AddEventScreen({ navigation, route }) {
   const [reminder, setReminder] = useState('15');
   
   // 计算显示的时间字符串（用于预览）
-  const startTimeString = startTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-  const endTimeString = endTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+  const startTimeString = startTime.toTimeString().slice(0, 5);
+  const endTimeString = endTime.toTimeString().slice(0, 5);
 
   // 获取农历日期字符串
   const getLunarDateString = (date) => {
@@ -47,7 +47,7 @@ export default function AddEventScreen({ navigation, route }) {
 
   // 验证开始时间是否早于当前时间
   const validateStartTime = (date, time) => {
-    const eventDateTime = new Date(date + 'T' + time.toLocaleTimeString('sv-SE'));
+    const eventDateTime = new Date(`${date}T${time.toTimeString().slice(0, 5)}`);
     const now = new Date();
     
     if (eventDateTime < now) {
@@ -87,7 +87,7 @@ export default function AddEventScreen({ navigation, route }) {
       };
 
       await addEvent(event);
-      Alert.alert('成功', '日程已保存');
+      // Alert.alert('成功', '日程已保存');
       navigation.goBack();
     } catch (error) {
       console.error('保存事件失败:', error);
@@ -99,6 +99,12 @@ export default function AddEventScreen({ navigation, route }) {
     setShowStartPicker(false);
     if (event.type === 'set' && selectedTime) {
       setStartTime(selectedTime);
+      // 自动调整结束时间，确保它在开始时间之后
+      if (selectedTime >= endTime) {
+        const newEndTime = new Date(selectedTime);
+        newEndTime.setHours(newEndTime.getHours() + 1);
+        setEndTime(newEndTime);
+      }
     }
   };
 
@@ -110,18 +116,15 @@ export default function AddEventScreen({ navigation, route }) {
   };
 
   return (
-    <LinearGradient
-      colors={['#e3f2fd', '#ffffff']}
-      style={styles.gradient}
-    >
-      <ScrollView contentContainerStyle={styles.container}>
+    <LinearGradient colors={['#42a5f5', '#1976d2']} style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollView}>
         <View style={styles.headerBox}>
           <View style={styles.headerTitle}>
           <TouchableOpacity 
               style={styles.backButton}
               onPress={() => navigation.goBack()}
             >
-              <Ionicons name="arrow-back" size={24} color="#1565c0" />
+              <Ionicons name="arrow-back" size={24} color="#fff" />
             </TouchableOpacity>
             <Text style={styles.header}>添加新日程</Text>
           </View>
@@ -242,8 +245,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   container: {
+    flex: 1,
     padding: 20,
     paddingBottom: 40,
+  },
+  scrollView: {
+    flexGrow: 1,
   },
   headerBox: {
     marginBottom: 20,
@@ -255,7 +262,7 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 26,
     fontWeight: '700',
-    color: '#1565c0',
+    color: '#fff',
   },
   headerTextContainer:{
     flex: 1,

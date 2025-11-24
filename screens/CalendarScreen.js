@@ -10,6 +10,7 @@ import { Calendar, LocaleConfig } from 'react-native-calendars';
 import WeekView from '../components/WeekView';
 import { getHoliday } from '../utils/holidays';
 import { convertToLunar } from '../utils/lunarCalculator';
+import { setupNotificationResponseHandler } from '../utils/notifications';
 
 // 配置中文月份
 LocaleConfig.locales['zh'] = {
@@ -27,10 +28,14 @@ export default function CalendarScreen({ navigation }) {
   const [events, setEvents] = useState([]);
   const [currentMonth, setCurrentMonth] = useState(dayjs().format('YYYY-MM-DD'));
   
+  // 设置通知响应处理器
+  useEffect(() => {
+    const subscription = setupNotificationResponseHandler(navigation);
+    return () => subscription.remove();
+  }, [navigation]);
+  
   // 使用函数来动态获取今天的日期
-  // const getToday = () => new Date().toLocaleDateString().split('/').join('-');
   const getToday = () => dayjs().format('YYYY-MM-DD');
-  // const getToday = () => new Date().toISOString().split('T')[0];  
   const [today, setToday] = useState(getToday());
 
   // 初始化：选中当天日期

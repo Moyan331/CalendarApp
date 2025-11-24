@@ -1,3 +1,4 @@
+// import { cancelNotification, scheduleNotification } from '@/utils/notifications';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import React, { useState } from 'react';
@@ -105,7 +106,25 @@ export default function EditEventScreen({ navigation, route }) {
         reminder: reminder ? parseInt(reminder) : null,
       };
       
+      // 更新数据库中的事件
       await updateEvent(event.id, updatedEvent);
+      
+      // // 处理通知 - 取消旧的通知并创建新的通知
+      // if (updatedEvent.reminder && updatedEvent.reminder > 0) {
+      //   // 计算提醒时间
+      //   const eventDateTime = new Date(`${updatedEvent.date}T${updatedEvent.startTime}`);
+      //   const remindTimeInMinutes = parseInt(updatedEvent.reminder);
+      //   eventDateTime.setMinutes(eventDateTime.getMinutes() - remindTimeInMinutes);
+        
+      //   // 取消之前的通知（如果存在）
+      //   cancelNotification(event.id);
+      //   // 创建新的通知
+      //   scheduleNotification(updatedEvent);
+      // } else {
+      //   // 如果没有设置提醒，则取消通知
+      //  cancelNotification(event.id);
+      // }
+      
       Alert.alert('成功', '日程已更新');
       navigation.goBack();
     } catch (error) {
