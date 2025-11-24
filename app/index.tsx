@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { initDB } from '../db/database';
+import { initNotifications } from '../utils/notifications';
 import AddEventScreen from '../screens/AddEventScreen';
 import CalendarScreen from '../screens/CalendarScreen';
 import EditEventScreen from '../screens/EditEventScreen';
@@ -20,10 +21,11 @@ export default function App() {
     const initializeApp = async () => {
       try {
         await initDB();
+        await initNotifications();
         setDbInitialized(true);
       } catch (error) {
         console.error('应用初始化失败:', error);
-        Alert.alert('错误', '数据库初始化失败，请重启应用');
+        Alert.alert('错误', '应用初始化失败，请重启应用');
       }
     };
     
@@ -34,7 +36,7 @@ export default function App() {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" />
-        <Text>初始化数据库...</Text>
+        <Text>初始化应用...</Text>
       </View>
     );
   }
