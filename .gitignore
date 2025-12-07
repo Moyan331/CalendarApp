@@ -41,3 +41,7 @@ app-example
 # generated native folders
 /ios
 /android
+
+CalendarAppStructure.png
+CalendarAppStructure.drawio
+.$CalendarAppStructure.drawio.bkp

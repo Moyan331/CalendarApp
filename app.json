@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "CalendarApp",
+    "name": "日程通",
     "slug": "CalendarApp",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -29,12 +29,6 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    },
-    "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "6b6471e8-cbc2-49c4-b94f-1af51775213d"
-      }
     }
   }
 }
