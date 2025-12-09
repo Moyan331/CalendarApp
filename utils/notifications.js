@@ -19,6 +19,7 @@ export const setupNotificationChannels = async () => {
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#FF231F7C',
       sound: 'default',
+      bypassDnd: true,
     });
     
     // 为已过期的通知设置单独的通道
@@ -35,6 +36,22 @@ export const setupNotificationChannels = async () => {
 // 请求通知权限
 export const requestPermissions = async () => {
   const { status } = await Notifications.requestPermissionsAsync();
+  if (status !== 'granted') {
+    // 尝试请求更多权限
+    const { status: finalStatus } = await Notifications.requestPermissionsAsync({
+      ios: {
+        allowAlert: true,
+        allowBadge: true,
+        allowSound: true,
+        allowAnnouncements: true,
+      },
+      android: {
+        allowAlert: true,
+        allowSound: true,
+      }
+    });
+    return finalStatus === 'granted';
+  }
   return status === 'granted';
 };
 
@@ -60,6 +77,7 @@ export const scheduleNotification = async (event) => {
         body: `事件 "${event.title}" 的提醒时间已过`,
         date: event.date,
         sound: 'default',
+        priority: Notifications.AndroidNotificationPriority.HIGH,
         channelId: Platform.OS === 'android' ? 'expired-reminders' : undefined,
       },
       trigger: null, // 立即触发
@@ -84,9 +102,10 @@ export const scheduleNotification = async (event) => {
             screen: 'ViewEvents',
       },
       sound: 'default',
+      priority: Notifications.AndroidNotificationPriority.HIGH,
+      channelId: Platform.OS === 'android' ? 'calendar-reminders' : undefined
     },
-    trigger: reminderTime,
-    channelId: Platform.OS === 'android' ? 'calendar-reminders' : undefined
+    trigger: reminderTime
   });
   
   return notificationId;
