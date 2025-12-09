@@ -299,23 +299,23 @@ export default function CalendarScreen({ navigation }) {
             />
           </View>
         )}
+      </View>
+      
+      {/* 底部按钮 */}
+      <View style={styles.bottomButtons}>
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={() => navigation.navigate('AddEvent', { selectedDate })}
+        >
+          <Text style={styles.buttonText}>➕ 添加日程</Text>
+        </TouchableOpacity>
 
-        {/* 底部按钮 */}
-        <View style={styles.bottomButtons}>
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => navigation.navigate('AddEvent', { selectedDate })}
-          >
-            <Text style={styles.buttonText}>➕ 添加日程</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => navigation.navigate('ViewEvents', { selectedDate })}
-          >
-            <Text style={styles.buttonText}>📋 查看事件</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={() => navigation.navigate('ViewEvents', { selectedDate })}
+        >
+          <Text style={styles.buttonText}>📋 查看事件</Text>
+        </TouchableOpacity>
       </View>
     </LinearGradient>
   );
@@ -341,20 +341,23 @@ const styles = StyleSheet.create({
 
   bottomButtons: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
     paddingVertical: 12,
     backgroundColor: '#f9f9f9',
     borderTopWidth: 1,
     borderColor: '#ddd',
+    marginHorizontal: -16, // 扩展到屏幕边缘
+    paddingHorizontal: 16,  // 内边距保持一致
   },
   actionButton: {
     flex: 1,
-    marginHorizontal: 10,
+    marginHorizontal: 8,
     backgroundColor: '#42a5f5',
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
+    minWidth: 120, // 设置最小宽度确保按钮可点击
   },
   buttonText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
 
