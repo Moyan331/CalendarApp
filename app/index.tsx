@@ -42,7 +42,7 @@ export default function App() {
   }
   
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }}>
       <Stack.Navigator initialRouteName="Calendar">
         <Stack.Screen 
           name="Calendar" 

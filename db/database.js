@@ -109,10 +109,12 @@ export const updateEvent = async (id, event) => {
   const oldEvent = await db.getFirstAsync('SELECT notificationId FROM events WHERE id = ?', id);
   if (oldEvent && oldEvent.notificationId) {
     await cancelNotification(oldEvent.notificationId);
+    console.log('取消通知成功，通知ID:', oldEvent.notificationId);
   }
   
   // 安排新的通知
   const notificationId = await scheduleNotification(event);
+  console.log('通知ID:', notificationId);
   
   await db.runAsync(
     `UPDATE events SET 

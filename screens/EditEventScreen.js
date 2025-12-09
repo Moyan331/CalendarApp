@@ -40,8 +40,8 @@ export default function EditEventScreen({ navigation, route }) {
   const [reminder, setReminder] = useState(event.reminder ? event.reminder.toString() : '0');
 
   // 计算显示的时间字符串
-  const startTimeString = startTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-  const endTimeString = endTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+  const startTimeString = startTime.toTimeString().slice(0, 5);
+  const endTimeString = endTime.toTimeString().slice(0, 5);
 
   // 获取农历日期字符串
   const getLunarDateString = (date) => {
@@ -108,22 +108,7 @@ export default function EditEventScreen({ navigation, route }) {
       
       // 更新数据库中的事件
       await updateEvent(event.id, updatedEvent);
-      
-      // // 处理通知 - 取消旧的通知并创建新的通知
-      // if (updatedEvent.reminder && updatedEvent.reminder > 0) {
-      //   // 计算提醒时间
-      //   const eventDateTime = new Date(`${updatedEvent.date}T${updatedEvent.startTime}`);
-      //   const remindTimeInMinutes = parseInt(updatedEvent.reminder);
-      //   eventDateTime.setMinutes(eventDateTime.getMinutes() - remindTimeInMinutes);
-        
-      //   // 取消之前的通知（如果存在）
-      //   cancelNotification(event.id);
-      //   // 创建新的通知
-      //   scheduleNotification(updatedEvent);
-      // } else {
-      //   // 如果没有设置提醒，则取消通知
-      //  cancelNotification(event.id);
-      // }
+
       
       Alert.alert('成功', '日程已更新');
       navigation.goBack();

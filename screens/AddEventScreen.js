@@ -9,7 +9,7 @@ import { getHoliday } from '../utils/holidays';
 import { convertToLunar } from '../utils/lunarCalculator';
 
 export default function AddEventScreen({ navigation, route }) {
-  const selectedDate = route.params?.selectedDate || new Date().toISOString().split('T')[0];
+  const selectedDate = route.params?.selectedDate || dayjs().format('YYYY-MM-DD');
   
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
