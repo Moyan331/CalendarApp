@@ -1,7 +1,15 @@
 // database.js
 import * as SQLite from 'expo-sqlite';
-import { cancelNotification, scheduleNotification } from '../utils/notifications';
+import { cancelNotification, scheduleLocalNotification } from '../utils/notifications';
 let db = null;
+let globalPushToken = null;
+
+/**
+ * 设置全局推送令牌
+ */
+export const setGlobalPushToken = (token) => {
+  globalPushToken = token;
+};
 
 /**
  * 初始化数据库
@@ -48,7 +56,10 @@ export const getDB = () => {
 export const addEvent = async (event) => {
   const db = getDB();
   console.log('准备安排通知，事件信息:', event);
-  const notificationId = await scheduleNotification(event);
+  
+  // 始终使用本地通知，不再尝试远程推送通知
+  const notificationId = await scheduleLocalNotification(event);
+  
   console.log('通知ID:', notificationId);
   const result = await db.runAsync(
     `INSERT INTO events (title, description, date, startTime, endTime, reminder, notificationId)
@@ -58,7 +69,7 @@ export const addEvent = async (event) => {
     event.date,
     event.startTime,
     event.endTime,
-    event.reminder || null,
+    event.reminder >= 0 ? event.reminder : null, // 存储实际数值，-1表示不提醒则存为null
     notificationId || null
   );
 
@@ -102,30 +113,40 @@ export const getEventsByDateRange = async (startDate, endDate) => {
  * @param {Object} event
  * @returns {Promise<void>}
  */
-export const updateEvent = async (id, event) => {
+export const updateEvent = async (id, eventData) => {
   const db = getDB();
   
-  // 先取消旧的通知
-  const oldEvent = await db.getFirstAsync('SELECT notificationId FROM events WHERE id = ?', id);
+  // 先获取旧事件信息以取消旧通知
+  const oldEvent = await db.getFirstAsync(
+    'SELECT * FROM events WHERE id = ?',
+    id
+  );
+  
+  // 取消旧通知
   if (oldEvent && oldEvent.notificationId) {
     await cancelNotification(oldEvent.notificationId);
-    console.log('取消通知成功，通知ID:', oldEvent.notificationId);
   }
   
-  // 安排新的通知
-  const notificationId = await scheduleNotification(event);
-  console.log('通知ID:', notificationId);
+  // 始终使用本地通知，不再尝试远程推送通知
+  const notificationId = await scheduleLocalNotification(eventData);
   
+  // 更新数据库记录
   await db.runAsync(
     `UPDATE events SET 
-      title = ?, description = ?, date = ?, startTime = ?, endTime = ?, reminder = ?, notificationId = ?
+      title = ?, 
+      description = ?, 
+      date = ?, 
+      startTime = ?, 
+      endTime = ?, 
+      reminder = ?,
+      notificationId = ?
      WHERE id = ?`,
-    event.title,
-    event.description || null,
-    event.date,
-    event.startTime,
-    event.endTime,
-    event.reminder || null,
+    eventData.title,
+    eventData.description || null,
+    eventData.date,
+    eventData.startTime,
+    eventData.endTime,
+    eventData.reminder >= 0 ? eventData.reminder : null, // 存储实际数值，-1表示不提醒则存为null
     notificationId || null,
     id
   );
@@ -139,13 +160,22 @@ export const updateEvent = async (id, event) => {
 export const deleteEvent = async (id) => {
   const db = getDB();
   
+  // 先获取事件信息以取消通知
+  const event = await db.getFirstAsync(
+    'SELECT * FROM events WHERE id = ?',
+    id
+  );
+  
   // 取消通知
-  const event = await db.getFirstAsync('SELECT notificationId FROM events WHERE id = ?', id);
   if (event && event.notificationId) {
     await cancelNotification(event.notificationId);
   }
   
-  await db.runAsync('DELETE FROM events WHERE id = ?', id);
+  // 删除数据库记录
+  await db.runAsync(
+    'DELETE FROM events WHERE id = ?',
+    id
+  );
 };
 
 /**

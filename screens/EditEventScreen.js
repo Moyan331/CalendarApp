@@ -37,7 +37,7 @@ export default function EditEventScreen({ navigation, route }) {
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
   
-  const [reminder, setReminder] = useState(event.reminder ? event.reminder.toString() : '0');
+  const [reminder, setReminder] = useState(event.reminder !==null ? event.reminder : -1);
 
   // 计算显示的时间字符串
   const startTimeString = startTime.toTimeString().slice(0, 5);
@@ -103,7 +103,7 @@ export default function EditEventScreen({ navigation, route }) {
         date: event.date,
         startTime: startTimeString,
         endTime: endTimeString,
-        reminder: reminder ? parseInt(reminder) : null,
+        reminder: parseInt(reminder),
       };
       
       // 更新数据库中的事件
@@ -225,13 +225,14 @@ export default function EditEventScreen({ navigation, route }) {
               onValueChange={setReminder}
               style={styles.reminderPicker}
             >
-              <Picker.Item label="不提醒" value="0" />
-              <Picker.Item label="5分钟前" value="5" />
-              <Picker.Item label="15分钟前" value="15" />
-              <Picker.Item label="30分钟前" value="30" />
-              <Picker.Item label="1小时前" value="60" />
-              <Picker.Item label="2小时前" value="120" />
-              <Picker.Item label="1天前" value="1440" />
+              <Picker.Item label="不提醒" value={-1} />
+              <Picker.Item label="立刻" value={0} />
+              <Picker.Item label="5分钟前" value={5} />
+              <Picker.Item label="15分钟前" value={15} />
+              <Picker.Item label="30分钟前" value={30} />
+              <Picker.Item label="1小时前" value={60} />
+              <Picker.Item label="2小时前" value={120} />
+              <Picker.Item label="1天前" value={1440} />
             </Picker>
           </View>
         </View>

@@ -112,9 +112,12 @@ export default function ViewEventsScreen({ navigation, route }) {
         <Text style={styles.eventDescription}>{item.description}</Text>
       ) : null}
 
-      {item.reminder ? (
-        <Text style={styles.eventReminder}>⏰ 提前 {item.reminder} 分钟提醒</Text>
+      {item.reminder !== null ? (
+        <Text style={styles.eventReminder}>
+          {item.reminder === 0 ? '⏰ 立刻提醒' : `⏰ 提前 ${item.reminder} 分钟提醒`}
+        </Text>
       ) : null}
+
     </View>
   );
 

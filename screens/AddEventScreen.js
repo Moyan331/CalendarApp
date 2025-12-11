@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
+import dayjs from 'dayjs';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -20,7 +21,7 @@ export default function AddEventScreen({ navigation, route }) {
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
   
-  const [reminder, setReminder] = useState('15');
+  const [reminder, setReminder] = useState(15);
   
   // 计算显示的时间字符串（用于预览）
   const startTimeString = startTime.toTimeString().slice(0, 5);
@@ -83,7 +84,7 @@ export default function AddEventScreen({ navigation, route }) {
         date: selectedDate,
         startTime: startTimeString,
         endTime: endTimeString,
-        reminder: parseInt(reminder) || 0,
+        reminder: parseInt(reminder),
       };
 
       await addEvent(event);
@@ -99,12 +100,11 @@ export default function AddEventScreen({ navigation, route }) {
     setShowStartPicker(false);
     if (event.type === 'set' && selectedTime) {
       setStartTime(selectedTime);
-      // 自动调整结束时间，确保它在开始时间之后
-      if (selectedTime >= endTime) {
-        const newEndTime = new Date(selectedTime);
-        newEndTime.setHours(newEndTime.getHours() + 1);
-        setEndTime(newEndTime);
-      }
+      
+      // 自动调整结束时间为开始时间之后1小时
+      const newEndTime = new Date(selectedTime);
+      newEndTime.setHours(selectedTime.getHours() + 1);
+      setEndTime(newEndTime);
     }
   };
 
@@ -215,13 +215,14 @@ export default function AddEventScreen({ navigation, route }) {
               onValueChange={setReminder}
               style={styles.reminderPicker}
             >
-              <Picker.Item label="不提醒" value="0" />
-              <Picker.Item label="5分钟前" value="5" />
-              <Picker.Item label="15分钟前" value="15" />
-              <Picker.Item label="30分钟前" value="30" />
-              <Picker.Item label="1小时前" value="60" />
-              <Picker.Item label="2小时前" value="120" />
-              <Picker.Item label="1天前" value="1440" />
+              <Picker.Item label="不提醒" value={-1} />
+              <Picker.Item label="立刻" value={0} />
+              <Picker.Item label="5分钟前" value={5} />
+              <Picker.Item label="15分钟前" value={15} />
+              <Picker.Item label="30分钟前" value={30} />
+              <Picker.Item label="1小时前" value={60} />
+              <Picker.Item label="2小时前" value={120} />
+              <Picker.Item label="1天前" value={1440} />
             </Picker>
           </View>
         </View>
