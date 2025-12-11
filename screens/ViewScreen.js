@@ -93,7 +93,7 @@ export default function ViewEventsScreen({ navigation, route }) {
             <Text style={styles.eventTimeStart}>
               {item.date} {item.startTime}
             </Text>
-            <Text style={styles.eventTimeSeparator}>-</Text>
+           <Text style={styles.eventTimeSeparator}>             至</Text>
             <Text style={styles.eventTimeEnd}>
               {item.endDate ? `${item.endDate} ` : ''}{item.endTime}
             </Text>
@@ -259,26 +259,22 @@ const styles = StyleSheet.create({
   },
   verticalTimeContainer: {
     flexDirection: 'column',
-    textAlign: 'center',
+    marginBottom: 8,
   },
   eventTimeStart: {
     fontSize: 17,
     fontWeight: 'bold',
     color: '#1976D2',
-    marginBottom: 4,
   },
   eventTimeSeparator: {
     fontSize: 17,
     fontWeight: 'bold',
     color: '#1976D2',
-    marginVertical: 2,
-    transform: [{rotate: '90deg'}],
   },
   eventTimeEnd: {
     fontSize: 17,
     fontWeight: 'bold',
     color: '#1976D2',
-    marginTop: 4,
   },
   eventTitle: {
     fontSize: 16,
@@ -310,7 +306,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     padding: 4,
   },
-
+ 
   /** 空页面 **/
   emptyContainer: {
     flex: 1,
@@ -357,7 +353,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '600',
   },
-
   /** 节日信息 **/
   holidayText: {
     fontSize: 14,

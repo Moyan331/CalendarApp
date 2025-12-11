@@ -294,7 +294,7 @@ export default function CalendarScreen({ navigation }) {
                     <Text style={styles.eventTimeStart}>
                       {item.date} {item.startTime}
                     </Text>
-                    <Text style={styles.eventTimeSeparator}>-</Text>
+                    <Text style={styles.eventTimeSeparator}>              至</Text>
                     <Text style={styles.eventTimeEnd}>
                       {item.endDate ? `${item.endDate} ` : ''}{item.endTime}
                     </Text>
@@ -357,20 +357,16 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: 'bold',
     color: '#1976D2',
-    marginBottom: 4,
   },
   eventTimeSeparator: {
     fontSize: 17,
     fontWeight: 'bold',
     color: '#1976D2',
-    marginVertical: 2,
-    transform: [{rotate: '90deg'}],
   },
   eventTimeEnd: {
     fontSize: 17,
     fontWeight: 'bold',
     color: '#1976D2',
-    marginTop: 4,
   },
   eventTitle: { fontSize: 16, color: '#333' },
   eventDateRange: {
