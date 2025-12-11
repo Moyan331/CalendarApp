@@ -290,9 +290,15 @@ export default function CalendarScreen({ navigation }) {
               keyExtractor={(item) => item.id.toString()}
               renderItem={({ item }) => (
                 <View style={styles.eventItem}>
-                  <Text style={styles.eventTime}>
-                     {item.date} {item.startTime} - {item.endDate ? `${item.endDate} ` : ''}{item.endTime}
-                  </Text>
+                  <View style={styles.verticalTimeContainer}>
+                    <Text style={styles.eventTimeStart}>
+                      {item.date} {item.startTime}
+                    </Text>
+                    <Text style={styles.eventTimeSeparator}>-</Text>
+                    <Text style={styles.eventTimeEnd}>
+                      {item.endDate ? `${item.endDate} ` : ''}{item.endTime}
+                    </Text>
+                  </View>
                   <Text style={styles.eventTitle}>{item.title}</Text>
                   {item.date !== item.endDate && item.endDate && (
                     <Text style={styles.eventDateRange}>
@@ -342,6 +348,29 @@ const styles = StyleSheet.create({
     fontWeight: 'bold', 
     color: '#1976D2',
     letterSpacing: 1,
+  },
+  verticalTimeContainer: {
+    flexDirection: 'column',
+    marginBottom: 8,
+  },
+  eventTimeStart: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    color: '#1976D2',
+    marginBottom: 4,
+  },
+  eventTimeSeparator: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    color: '#1976D2',
+    marginVertical: 2,
+    transform: [{rotate: '90deg'}],
+  },
+  eventTimeEnd: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    color: '#1976D2',
+    marginTop: 4,
   },
   eventTitle: { fontSize: 16, color: '#333' },
   eventDateRange: {

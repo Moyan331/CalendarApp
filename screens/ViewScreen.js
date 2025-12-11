@@ -88,9 +88,17 @@ export default function ViewEventsScreen({ navigation, route }) {
   const renderEventItem = ({ item }) => (
     <View style={styles.eventCard}>
       <View style={styles.eventHeader}>
-        <Text style={styles.eventTime}>
-          {item.startTime} - {item.endTime}
-        </Text>
+        <View style={styles.eventTimeContainer}>
+          <View style={styles.verticalTimeContainer}>
+            <Text style={styles.eventTimeStart}>
+              {item.date} {item.startTime}
+            </Text>
+            <Text style={styles.eventTimeSeparator}>-</Text>
+            <Text style={styles.eventTimeEnd}>
+              {item.endDate ? `${item.endDate} ` : ''}{item.endTime}
+            </Text>
+          </View>
+        </View>
         <View style={styles.actionGroup}>
           <TouchableOpacity
             onPress={() => navigation.navigate('EditEvent', { event: item })}
@@ -114,8 +122,8 @@ export default function ViewEventsScreen({ navigation, route }) {
 
       {/* 显示日期范围 */}
       {item.date !== item.endDate && item.endDate ? (
-        <Text style={styles.eventDateRange}>
-          📅 日期: {item.date} 至 {item.endDate}
+        <Text style={styles.eventDate} numberOfLines={1}>
+          📅 日期：{item.date} 至 {item.endDate}
         </Text>
       ) : (
         <Text style={styles.eventDate}>
@@ -241,17 +249,39 @@ const styles = StyleSheet.create({
   eventHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: 6,
+    paddingRight: 10, // 新增：为操作按钮留出空间
   },
-  eventTime: {
-    fontSize: 20,
+  eventTimeContainer: {
+    flex: 1,
+    paddingRight: 10,
+  },
+  verticalTimeContainer: {
+    flexDirection: 'column',
+    textAlign: 'center',
+  },
+  eventTimeStart: {
+    fontSize: 17,
     fontWeight: 'bold',
     color: '#1976D2',
-    letterSpacing: 1,
+    marginBottom: 4,
+  },
+  eventTimeSeparator: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    color: '#1976D2',
+    marginVertical: 2,
+    transform: [{rotate: '90deg'}],
+  },
+  eventTimeEnd: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    color: '#1976D2',
+    marginTop: 4,
   },
   eventTitle: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 4,
@@ -270,12 +300,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#666',
     marginTop: 4,
-  },
-  eventDateRange: {
-    fontSize: 13,
-    color: '#666',
-    marginTop: 4,
-    fontWeight: 'bold',
   },
 
   /** 操作区 **/
