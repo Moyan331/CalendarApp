@@ -112,6 +112,17 @@ export default function ViewEventsScreen({ navigation, route }) {
         <Text style={styles.eventDescription}>{item.description}</Text>
       ) : null}
 
+      {/* 显示日期范围 */}
+      {item.date !== item.endDate && item.endDate ? (
+        <Text style={styles.eventDateRange}>
+          📅 日期: {item.date} 至 {item.endDate}
+        </Text>
+      ) : (
+        <Text style={styles.eventDate}>
+          📅 日期: {item.date}
+        </Text>
+      )}
+
       {item.reminder !== null ? (
         <Text style={styles.eventReminder}>
           {item.reminder === 0 ? '⏰ 立刻提醒' : `⏰ 提前 ${item.reminder} 分钟提醒`}
@@ -254,6 +265,17 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#888',
     marginTop: 4,
+  },
+  eventDate: {
+    fontSize: 13,
+    color: '#666',
+    marginTop: 4,
+  },
+  eventDateRange: {
+    fontSize: 13,
+    color: '#666',
+    marginTop: 4,
+    fontWeight: 'bold',
   },
 
   /** 操作区 **/

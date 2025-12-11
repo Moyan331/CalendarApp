@@ -15,13 +15,23 @@ export default function AddEventScreen({ navigation, route }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   
+  // 日期状态
+  const [startDate, setStartDate] = useState(new Date(selectedDate));
+  const [endDate, setEndDate] = useState(new Date(selectedDate));
+  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
+  
   // 时间状态 - 使用Date对象而不是数字
   const [startTime, setStartTime] = useState(new Date());
   const [endTime, setEndTime] = useState(new Date(new Date().setHours(new Date().getHours() + 1)));
-  const [showStartPicker, setShowStartPicker] = useState(false);
-  const [showEndPicker, setShowEndPicker] = useState(false);
+  const [showStartTimePicker, setShowStartTimePicker] = useState(false);
+  const [showEndTimePicker, setShowEndTimePicker] = useState(false);
   
   const [reminder, setReminder] = useState(15);
+  
+  // 计算显示的日期字符串（用于预览）
+  const startDateString = dayjs(startDate).format('YYYY-MM-DD');
+  const endDateString = dayjs(endDate).format('YYYY-MM-DD');
   
   // 计算显示的时间字符串（用于预览）
   const startTimeString = startTime.toTimeString().slice(0, 5);
@@ -46,17 +56,6 @@ export default function AddEventScreen({ navigation, route }) {
     }
   };
 
-  // 验证开始时间是否早于当前时间
-  const validateStartTime = (date, time) => {
-    const eventDateTime = new Date(`${date}T${time.toTimeString().slice(0, 5)}`);
-    const now = new Date();
-    
-    if (eventDateTime < now) {
-      return '开始时间不能早于当前时间';
-    }
-    
-    return '';
-  };
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -64,15 +63,11 @@ export default function AddEventScreen({ navigation, route }) {
       return;
     }
     
-    // 验证开始时间是否早于当前时间
-    const timeValidation = validateStartTime(selectedDate, startTime);
-    if (timeValidation) {
-      Alert.alert('错误', timeValidation);
-      return;
-    }
-    
     // 验证结束时间是否在开始时间之后
-    if (endTime <= startTime) {
+    const startDateTime = new Date(startDateString + 'T' + startTimeString);
+    const endDateTime = new Date(endDateString + 'T' + endTimeString);
+    
+    if (endDateTime <= startDateTime) {
       Alert.alert('错误', '结束时间必须在开始时间之后');
       return;
     }
@@ -81,7 +76,8 @@ export default function AddEventScreen({ navigation, route }) {
       const event = {
         title,
         description,
-        date: selectedDate,
+        date: startDateString,
+        endDate: endDateString,
         startTime: startTimeString,
         endTime: endTimeString,
         reminder: parseInt(reminder),
@@ -96,8 +92,22 @@ export default function AddEventScreen({ navigation, route }) {
     }
   };
 
-  const onStartChange = (event, selectedTime) => {
-    setShowStartPicker(false);
+  const onStartDateChange = (event, selectedDate) => {
+    setShowStartDatePicker(false);
+    if (event.type === 'set' && selectedDate) {
+      setStartDate(selectedDate);
+    }
+  };
+
+  const onEndDateChange = (event, selectedDate) => {
+    setShowEndDatePicker(false);
+    if (event.type === 'set' && selectedDate) {
+      setEndDate(selectedDate);
+    }
+  };
+
+  const onStartTimeChange = (event, selectedTime) => {
+    setShowStartTimePicker(false);
     if (event.type === 'set' && selectedTime) {
       setStartTime(selectedTime);
       
@@ -108,8 +118,8 @@ export default function AddEventScreen({ navigation, route }) {
     }
   };
 
-  const onEndChange = (event, selectedTime) => {
-    setShowEndPicker(false);
+  const onEndTimeChange = (event, selectedTime) => {
+    setShowEndTimePicker(false);
     if (event.type === 'set' && selectedTime) {
       setEndTime(selectedTime);
     }
@@ -155,6 +165,48 @@ export default function AddEventScreen({ navigation, route }) {
         </View>
 
         <View style={styles.card}>
+          <Text style={styles.sectionTitle}>🕒 日期设置</Text>
+          
+          {/* 开始日期选择器 */}
+          <View style={styles.timePickerContainer}>
+            <Text style={styles.label}>开始日期</Text>
+            <TouchableOpacity 
+              style={styles.timeButton} 
+              onPress={() => setShowStartDatePicker(true)}
+            >
+              <Text style={styles.timeButtonText}>{startDateString}</Text>
+            </TouchableOpacity>
+            {showStartDatePicker && (
+              <DateTimePicker
+                value={startDate}
+                mode="date"
+                display="spinner"
+                onChange={onStartDateChange}
+                locale="zh-CN"
+              />
+            )}
+          </View>
+          
+          {/* 结束日期选择器 */}
+          <View style={styles.timePickerContainer}>
+            <Text style={styles.label}>结束日期</Text>
+            <TouchableOpacity 
+              style={styles.timeButton} 
+              onPress={() => setShowEndDatePicker(true)}
+            >
+              <Text style={styles.timeButtonText}>{endDateString}</Text>
+            </TouchableOpacity>
+            {showEndDatePicker && (
+              <DateTimePicker
+                value={endDate}
+                mode="date"
+                display="spinner"
+                onChange={onEndDateChange}
+                locale="zh-CN"
+              />
+            )}
+          </View>
+          
           <Text style={styles.sectionTitle}>🕒 时间设置</Text>
           
           {/* 开始时间选择器 */}
@@ -162,16 +214,16 @@ export default function AddEventScreen({ navigation, route }) {
             <Text style={styles.label}>开始时间</Text>
             <TouchableOpacity 
               style={styles.timeButton} 
-              onPress={() => setShowStartPicker(true)}
+              onPress={() => setShowStartTimePicker(true)}
             >
               <Text style={styles.timeButtonText}>{startTimeString}</Text>
             </TouchableOpacity>
-            {showStartPicker && (
+            {showStartTimePicker && (
               <DateTimePicker
                 value={startTime}
                 mode="time"
                 display="spinner"
-                onChange={onStartChange}
+                onChange={onStartTimeChange}
                 locale="zh-CN"
               />
             )}
@@ -182,16 +234,16 @@ export default function AddEventScreen({ navigation, route }) {
             <Text style={styles.label}>结束时间</Text>
             <TouchableOpacity 
               style={styles.timeButton} 
-              onPress={() => setShowEndPicker(true)}
+              onPress={() => setShowEndTimePicker(true)}
             >
               <Text style={styles.timeButtonText}>{endTimeString}</Text>
             </TouchableOpacity>
-            {showEndPicker && (
+            {showEndTimePicker && (
               <DateTimePicker
                 value={endTime}
                 mode="time"
                 display="spinner"
-                onChange={onEndChange}
+                onChange={onEndTimeChange}
                 locale="zh-CN"
               />
             )}
@@ -200,11 +252,11 @@ export default function AddEventScreen({ navigation, route }) {
           {/* 时间预览 */}
           <View style={styles.timePreview}>
             <Text style={styles.timePreviewText}>
-              开始时间: {startTimeString} | 结束时间: {endTimeString}
+              开始: {startDateString} {startTimeString} | 结束: {endDateString} {endTimeString}
             </Text>
             <Text style={styles.durationText}>
-              持续时间: {Math.floor((endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60))}小时
-              {Math.floor((endTime.getTime() - startTime.getTime()) % (1000 * 60 * 60) / (1000 * 60))}分钟
+              持续时间: {Math.floor((new Date(endDateString + 'T' + endTimeString) - new Date(startDateString + 'T' + startTimeString)) / (1000 * 60 * 60))}小时
+              {Math.floor((new Date(endDateString + 'T' + endTimeString) - new Date(startDateString + 'T' + startTimeString)) % (1000 * 60 * 60) / (1000 * 60))}分钟
             </Text>
           </View>
 

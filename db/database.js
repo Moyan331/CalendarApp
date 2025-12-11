@@ -28,6 +28,7 @@ export const initDB = async () => {
         title TEXT NOT NULL,
         description TEXT,
         date TEXT NOT NULL,
+        endDate TEXT,
         startTime TEXT NOT NULL,
         endTime TEXT NOT NULL,
         reminder INTEGER,
@@ -57,16 +58,17 @@ export const addEvent = async (event) => {
   const db = getDB();
   console.log('准备安排通知，事件信息:', event);
   
-  // 始终使用本地通知，不再尝试远程推送通知
+  // 只使用本地通知，不使用远程推送通知
   const notificationId = await scheduleLocalNotification(event);
   
   console.log('通知ID:', notificationId);
   const result = await db.runAsync(
-    `INSERT INTO events (title, description, date, startTime, endTime, reminder, notificationId)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO events (title, description, date, endDate, startTime, endTime, reminder, notificationId)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     event.title,
     event.description || null,
     event.date,
+    event.endDate || null,
     event.startTime,
     event.endTime,
     event.reminder >= 0 ? event.reminder : null, // 存储实际数值，-1表示不提醒则存为null
@@ -84,7 +86,11 @@ export const addEvent = async (event) => {
 export const getEvents = async (date) => {
   const db = getDB();
   const rows = await db.getAllAsync(
-    'SELECT * FROM events WHERE date = ?',
+    `SELECT * FROM events 
+     WHERE date = ? 
+     OR (date <= ? AND (endDate IS NULL OR endDate >= ?))`,
+    date,
+    date,
     date
   );
   return rows;
@@ -100,9 +106,11 @@ export const getEvents = async (date) => {
 export const getEventsByDateRange = async (startDate, endDate) => {
   const db = getDB();
   const rows = await db.getAllAsync(
-    'SELECT * FROM events WHERE date BETWEEN ? AND ? ORDER BY date, startTime',
-    startDate,
-    endDate
+    `SELECT * FROM events 
+     WHERE date <= ? AND (endDate IS NULL OR endDate >= ?)
+     ORDER BY date, startTime`,
+    endDate,
+    startDate
   );
   return rows;
 };
@@ -127,7 +135,7 @@ export const updateEvent = async (id, eventData) => {
     await cancelNotification(oldEvent.notificationId);
   }
   
-  // 始终使用本地通知，不再尝试远程推送通知
+  // 只使用本地通知，不使用远程推送通知
   const notificationId = await scheduleLocalNotification(eventData);
   
   // 更新数据库记录
@@ -136,6 +144,7 @@ export const updateEvent = async (id, eventData) => {
       title = ?, 
       description = ?, 
       date = ?, 
+      endDate = ?,
       startTime = ?, 
       endTime = ?, 
       reminder = ?,
@@ -144,6 +153,7 @@ export const updateEvent = async (id, eventData) => {
     eventData.title,
     eventData.description || null,
     eventData.date,
+    eventData.endDate || null,
     eventData.startTime,
     eventData.endTime,
     eventData.reminder >= 0 ? eventData.reminder : null, // 存储实际数值，-1表示不提醒则存为null

@@ -290,8 +290,15 @@ export default function CalendarScreen({ navigation }) {
               keyExtractor={(item) => item.id.toString()}
               renderItem={({ item }) => (
                 <View style={styles.eventItem}>
-                  <Text style={styles.eventTime}>{item.startTime} - {item.endTime}</Text>
+                  <Text style={styles.eventTime}>
+                     {item.date} {item.startTime} - {item.endDate ? `${item.endDate} ` : ''}{item.endTime}
+                  </Text>
                   <Text style={styles.eventTitle}>{item.title}</Text>
+                  {item.date !== item.endDate && item.endDate && (
+                    <Text style={styles.eventDateRange}>
+                      📅 日期: {item.date} 至 {item.endDate}
+                    </Text>
+                  )}
                 </View>
               )}
               ListEmptyComponent={<Text style={styles.emptyText}>这天还没有事件~</Text>}
@@ -331,12 +338,18 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 18, fontWeight: '600', color: '#1976d2', marginBottom: 10 },
   eventItem: { padding: 10, marginBottom: 10, borderRadius: 10, backgroundColor: '#e3f2fd' },
   eventTime: { 
-    fontSize: 18, 
+    fontSize: 17, 
     fontWeight: 'bold', 
     color: '#1976D2',
     letterSpacing: 1,
   },
   eventTitle: { fontSize: 16, color: '#333' },
+  eventDateRange: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 4,
+    fontWeight: 'bold',
+  },
   emptyText: { textAlign: 'center', color: '#aaa', marginTop: 20 },
 
   bottomButtons: {

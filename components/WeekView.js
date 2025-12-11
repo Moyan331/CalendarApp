@@ -120,11 +120,10 @@ export default function WeekView({ selected, onDaySelect }) {
           <View style={styles.eventItem}>
             <TouchableOpacity
             onPress={() => handleWeekChange(item.date)}>
-            <Text style={styles.eventDate}>
-              {item.date}
-            </Text>
-            <Text style={styles.eventDate}>{item.startTime} - {item.endTime}</Text>
             <Text style={styles.eventTitle}>{item.title}</Text>
+            <Text style={styles.eventDateTime}>
+              {item.date} {item.startTime} - {item.endDate ? `${item.endDate} ` : ''}{item.endTime}
+            </Text>
             </TouchableOpacity>
           </View>
         )}
@@ -176,7 +175,15 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     letterSpacing: 0.5,
   },
-  eventTitle: { fontSize: 16 },
+  eventDateTime: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 4,
+  },
+  eventTitle: { 
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   emptyText: { textAlign: 'center', marginTop: 20, color: '#aaa' },
 
 
